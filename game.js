@@ -1,4 +1,4 @@
-// Vibed Pong — v0.1 Wall Practice
+// Vibed Pong — v0.2 Sound
 
 const CONFIG = {
   width: 800,
@@ -8,6 +8,7 @@ const CONFIG = {
   ball: { size: 10, startSpeed: 350, speedUp: 1.05, maxSpeed: 900 },
   maxBounceAngle: Math.PI / 3, // reached when the ball hits the paddle's very edge
   maxServeAngle: Math.PI / 4,
+  volume: 0.15,
 };
 
 const canvas = document.getElementById('game');
@@ -40,6 +41,39 @@ function resetRound() {
   b.vy = b.speed * Math.sin(angle);
 }
 
+// --- Sound ---
+
+// Synthesized beeps, so there are no audio files to load
+const sound = {
+  ctx: null,
+  muted: false,
+
+  // Browsers only allow audio once the player has interacted with the page
+  unlock() {
+    if (!this.ctx) this.ctx = new AudioContext();
+  },
+
+  beep(freq, duration, type = 'square', endFreq = freq) {
+    if (!this.ctx || this.muted) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, t + duration);
+    gain.gain.setValueAtTime(CONFIG.volume, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+    osc.connect(gain).connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + duration);
+  },
+
+  // Pitch rises with ball speed, so you can hear the rally heating up
+  paddle(speed) { this.beep(440 * Math.sqrt(speed / CONFIG.ball.startSpeed), 0.08); },
+  wall() { this.beep(220, 0.06); },
+  miss() { this.beep(300, 0.5, 'sawtooth', 60); },
+};
+
 // --- Input ---
 
 // Physical key codes, so W/S work the same on any keyboard layout
@@ -49,8 +83,11 @@ window.addEventListener('keydown', (e) => {
   if (['ArrowUp', 'ArrowDown', 'Space'].includes(e.code)) e.preventDefault();
   keys.add(e.code);
   if (e.repeat) return;
+  sound.unlock();
 
-  if (e.code === 'Space' && (state.mode === 'start' || state.mode === 'over')) {
+  if (e.code === 'KeyM') {
+    sound.muted = !sound.muted;
+  } else if (e.code === 'Space' && (state.mode === 'start' || state.mode === 'over')) {
     resetRound();
     state.mode = 'playing';
   } else if (e.code === 'KeyP') {
@@ -84,13 +121,16 @@ function update(dt) {
   if (b.y < wall) {
     b.y = wall;
     b.vy = Math.abs(b.vy);
+    sound.wall();
   } else if (b.y + B.size > height - wall) {
     b.y = height - wall - B.size;
     b.vy = -Math.abs(b.vy);
+    sound.wall();
   }
   if (b.x + B.size > width - wall) {
     b.x = width - wall - B.size;
     b.vx = -Math.abs(b.vx);
+    sound.wall();
   }
 
   // Check whether the ball crossed the paddle's face this frame, rather than
@@ -106,9 +146,13 @@ function update(dt) {
     b.vy = b.speed * Math.sin(angle);
     state.score++;
     state.best = Math.max(state.best, state.score);
+    sound.paddle(b.speed);
   }
 
-  if (b.x + B.size < 0) state.mode = 'over';
+  if (b.x + B.size < 0) {
+    state.mode = 'over';
+    sound.miss();
+  }
 }
 
 // --- Render ---
@@ -142,12 +186,13 @@ function render() {
 
   drawText(state.score, width / 2, 80, 48);
   drawText(`BEST ${state.best}`, width - 30, 45, 18, 'right');
+  if (sound.muted) drawText('MUTED', 30, 45, 18, 'left');
 
   if (state.mode === 'start') {
     drawOverlay([
       ['VIBED PONG', 48],
       ['Press Space to start', 22],
-      ['W/S or ↑/↓ to move · P to pause', 16],
+      ['W/S or ↑/↓ to move · P to pause · M to mute', 16],
     ]);
   } else if (state.mode === 'paused') {
     drawOverlay([['PAUSED', 48], ['Press P to resume', 22]]);
