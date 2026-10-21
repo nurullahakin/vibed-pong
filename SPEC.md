@@ -4,7 +4,13 @@ A 2D Pong game in the browser. Start small, add features later.
 
 Built with plain JavaScript and an HTML5 canvas. Open `index.html` to play.
 
-## v0.3 — Game Modes (now)
+## v0.4 — CPU Opponent (now)
+
+- `3` on the start screen plays against the computer, which controls the right paddle
+- Same rules as two players. You can move with `W`/`S` or `↑`/`↓`.
+- The CPU is beatable: it moves slower than you, reacts a little late, doesn't predict bounces and doesn't always aim with the middle of its paddle
+
+## v0.3 — Game Modes (done)
 
 - The start screen has a mode choice: `1` for Solo (wall practice), `2` for Two players
 - Two players: left uses `W`/`S`, right uses `↑`/`↓`. Miss the ball and your opponent scores. First to 11 wins.
@@ -32,13 +38,13 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Later
 
-1. CPU opponent
-2. Visual polish
-3. Power-ups
-4. Online multiplayer
+1. Visual polish
+2. Power-ups
+3. Online multiplayer
 
 ## Progress
 
+- **2026-10-21** — v0.4 built.
 - **2026-10-21** — v0.3 built.
 - **2026-10-21** — v0.2 built.
 - **2026-10-21** — v0.1 built.
@@ -49,3 +55,4 @@ Like juggling a football: keep the ball going as long as you can.
 - No framework or build step to keep it simple. Revisit if multiplayer needs one.
 - v0.1 is single-player against a wall: there's only one paddle to build, and it's a quick way to tune the ball physics before adding a second player.
 - Sounds are generated in the browser instead of loaded from audio files, so there's nothing extra to download or license.
+- The CPU has one difficulty, tuned by simulation so an average player wins about 60–75% of games. Difficulty levels can come later if one level isn't enough.
