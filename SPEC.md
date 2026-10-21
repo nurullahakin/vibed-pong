@@ -28,6 +28,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-10-21** — v0.1 built.
 - **2026-10-21** — Spec written. v0.1 changed to single-player against a wall. No code yet.
 
 ## Decisions
