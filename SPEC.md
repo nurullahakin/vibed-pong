@@ -4,7 +4,14 @@ A 2D Pong game in the browser. Start small, add features later.
 
 Built with plain JavaScript and an HTML5 canvas. Open `index.html` to play.
 
-## v0.2 — Sound (now)
+## v0.3 — Game Modes (now)
+
+- The start screen has a mode choice: `1` for Solo (wall practice), `2` for Two players
+- Two players: left uses `W`/`S`, right uses `↑`/`↓`. Miss the ball and your opponent scores. First to 11 wins.
+- After each point the ball waits a second, then serves toward whoever conceded
+- `Esc` goes back to the menu from the pause or game over screen
+
+## v0.2 — Sound (done)
 
 - Beeps when the ball hits the paddle or a wall, and a low buzz when you miss
 - The paddle beep gets higher as the ball speeds up
@@ -25,14 +32,14 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Later
 
-1. Two players on one keyboard
-2. CPU opponent
-3. Visual polish
-4. Power-ups
-5. Online multiplayer
+1. CPU opponent
+2. Visual polish
+3. Power-ups
+4. Online multiplayer
 
 ## Progress
 
+- **2026-10-21** — v0.3 built.
 - **2026-10-21** — v0.2 built.
 - **2026-10-21** — v0.1 built.
 - **2026-10-21** — Spec written. v0.1 changed to single-player against a wall. No code yet.

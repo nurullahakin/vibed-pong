@@ -1,14 +1,25 @@
-// Vibed Pong — v0.2 Sound
+// Vibed Pong — v0.3 Game Modes
 
 const CONFIG = {
   width: 800,
   height: 600,
   wall: 10,
-  paddle: { x: 20, width: 10, height: 80, speed: 450 },
+  paddle: { inset: 20, width: 10, height: 80, speed: 450 },
   ball: { size: 10, startSpeed: 350, speedUp: 1.05, maxSpeed: 900 },
   maxBounceAngle: Math.PI / 3, // reached when the ball hits the paddle's very edge
   maxServeAngle: Math.PI / 4,
+  winScore: 11,
+  serveDelay: 1, // seconds before each serve in two-player
   volume: 0.15,
+};
+
+// Keys for each paddle, left first. Solo lets either set move the one paddle.
+const CONTROLS = {
+  solo: [{ up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'] }],
+  versus: [
+    { up: ['KeyW'], down: ['KeyS'] },
+    { up: ['ArrowUp'], down: ['ArrowDown'] },
+  ],
 };
 
 const canvas = document.getElementById('game');
@@ -19,26 +30,42 @@ canvas.height = CONFIG.height;
 // --- State ---
 
 const state = {
-  mode: 'start', // start | playing | paused | over
-  score: 0,
-  best: 0,
-  paddle: { y: 0 },
+  screen: 'menu', // menu | playing | paused | over
+  mode: 'solo', // solo | versus
+  scores: [0, 0], // solo only uses the first
+  best: 0, // solo only
+  paddles: [{ x: 0, y: 0 }, { x: 0, y: 0 }],
   ball: { x: 0, y: 0, vx: 0, vy: 0, speed: 0 },
+  serveTimer: 0,
 };
 
-function resetRound() {
-  const { width, height, paddle, ball } = CONFIG;
-  state.score = 0;
-  state.paddle.y = (height - paddle.height) / 2;
+function resetField(mode) {
+  const { width, height, paddle } = CONFIG;
+  state.mode = mode;
+  state.scores = [0, 0];
+  state.paddles[0].x = paddle.inset;
+  state.paddles[1].x = width - paddle.inset - paddle.width;
+  for (const p of state.paddles) p.y = (height - paddle.height) / 2;
+  // Solo serves toward the far wall so the player has a moment to get ready
+  serve(mode === 'solo' || Math.random() < 0.5 ? 1 : -1);
+}
 
+function startGame(mode) {
+  resetField(mode);
+  state.screen = 'playing';
+}
+
+// dir: 1 serves to the right, -1 to the left
+function serve(dir) {
+  const { width, height, ball } = CONFIG;
   const b = state.ball;
   b.x = (width - ball.size) / 2;
   b.y = (height - ball.size) / 2;
   b.speed = ball.startSpeed;
-  // Serve toward the far wall so the player has a moment to get ready
   const angle = (Math.random() * 2 - 1) * CONFIG.maxServeAngle;
-  b.vx = b.speed * Math.cos(angle);
+  b.vx = dir * b.speed * Math.cos(angle);
   b.vy = b.speed * Math.sin(angle);
+  state.serveTimer = state.mode === 'versus' ? CONFIG.serveDelay : 0;
 }
 
 // --- Sound ---
@@ -78,6 +105,7 @@ const sound = {
 
 // Physical key codes, so W/S work the same on any keyboard layout
 const keys = new Set();
+const held = (codes) => codes.some((c) => keys.has(c));
 
 window.addEventListener('keydown', (e) => {
   if (['ArrowUp', 'ArrowDown', 'Space'].includes(e.code)) e.preventDefault();
@@ -85,14 +113,18 @@ window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   sound.unlock();
 
+  const { screen } = state;
   if (e.code === 'KeyM') {
     sound.muted = !sound.muted;
-  } else if (e.code === 'Space' && (state.mode === 'start' || state.mode === 'over')) {
-    resetRound();
-    state.mode = 'playing';
-  } else if (e.code === 'KeyP') {
-    if (state.mode === 'playing') state.mode = 'paused';
-    else if (state.mode === 'paused') state.mode = 'playing';
+  } else if (screen === 'menu') {
+    if (e.code === 'Digit1' || e.code === 'Numpad1') startGame('solo');
+    if (e.code === 'Digit2' || e.code === 'Numpad2') startGame('versus');
+  } else if (e.code === 'KeyP' && (screen === 'playing' || screen === 'paused')) {
+    state.screen = screen === 'playing' ? 'paused' : 'playing';
+  } else if (e.code === 'Space' && screen === 'over') {
+    startGame(state.mode);
+  } else if (e.code === 'Escape' && (screen === 'paused' || screen === 'over')) {
+    state.screen = 'menu';
   }
 });
 
@@ -104,14 +136,21 @@ window.addEventListener('blur', () => keys.clear());
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
 function update(dt) {
-  if (state.mode !== 'playing') return;
+  if (state.screen !== 'playing') return;
   const { width, height, wall, paddle: P, ball: B } = CONFIG;
+  const solo = state.mode === 'solo';
 
-  let dir = 0;
-  if (keys.has('KeyW') || keys.has('ArrowUp')) dir -= 1;
-  if (keys.has('KeyS') || keys.has('ArrowDown')) dir += 1;
-  const p = state.paddle;
-  p.y = clamp(p.y + dir * P.speed * dt, wall, height - wall - P.height);
+  CONTROLS[state.mode].forEach((keySet, i) => {
+    const p = state.paddles[i];
+    const dir = (held(keySet.down) ? 1 : 0) - (held(keySet.up) ? 1 : 0);
+    p.y = clamp(p.y + dir * P.speed * dt, wall, height - wall - P.height);
+  });
+
+  // Paddles can move while the ball waits to be served
+  if (state.serveTimer > 0) {
+    state.serveTimer -= dt;
+    return;
+  }
 
   const b = state.ball;
   const prevX = b.x;
@@ -127,32 +166,56 @@ function update(dt) {
     b.vy = -Math.abs(b.vy);
     sound.wall();
   }
-  if (b.x + B.size > width - wall) {
+  if (solo && b.x + B.size > width - wall) {
     b.x = width - wall - B.size;
     b.vx = -Math.abs(b.vx);
     sound.wall();
   }
 
-  // Check whether the ball crossed the paddle's face this frame, rather than
-  // whether it overlaps now, so it can't skip through at high speed.
-  const face = P.x + P.width;
-  const crossed = b.vx < 0 && prevX >= face && b.x < face;
-  if (crossed && b.y + B.size > p.y && b.y < p.y + P.height) {
-    b.x = face;
-    const offset = (b.y + B.size / 2 - (p.y + P.height / 2)) / (P.height / 2);
-    const angle = clamp(offset, -1, 1) * CONFIG.maxBounceAngle;
-    b.speed = Math.min(b.speed * B.speedUp, B.maxSpeed);
-    b.vx = b.speed * Math.cos(angle);
-    b.vy = b.speed * Math.sin(angle);
-    state.score++;
-    state.best = Math.max(state.best, state.score);
-    sound.paddle(b.speed);
+  if (hitPaddle(state.paddles[0], 1, prevX) && solo) {
+    state.scores[0]++;
+    state.best = Math.max(state.best, state.scores[0]);
   }
+  if (!solo) hitPaddle(state.paddles[1], -1, prevX);
 
-  if (b.x + B.size < 0) {
-    state.mode = 'over';
-    sound.miss();
+  if (b.x + B.size < 0) miss(0);
+  else if (!solo && b.x > width) miss(1);
+}
+
+// dir is the way the paddle sends the ball back: 1 for the left paddle, -1 for the right
+function hitPaddle(p, dir, prevX) {
+  const { paddle: P, ball: B } = CONFIG;
+  const b = state.ball;
+  // The ball's x when touching the paddle's face. Check whether the ball crossed
+  // it this frame, rather than whether it overlaps now, so it can't skip through
+  // at high speed.
+  const contactX = dir > 0 ? p.x + P.width : p.x - B.size;
+  const crossed = dir > 0
+    ? b.vx < 0 && prevX >= contactX && b.x < contactX
+    : b.vx > 0 && prevX <= contactX && b.x > contactX;
+  if (!crossed || b.y + B.size <= p.y || b.y >= p.y + P.height) return false;
+
+  b.x = contactX;
+  const offset = (b.y + B.size / 2 - (p.y + P.height / 2)) / (P.height / 2);
+  const angle = clamp(offset, -1, 1) * CONFIG.maxBounceAngle;
+  b.speed = Math.min(b.speed * B.speedUp, B.maxSpeed);
+  b.vx = dir * b.speed * Math.cos(angle);
+  b.vy = b.speed * Math.sin(angle);
+  sound.paddle(b.speed);
+  return true;
+}
+
+// loser: 0 for the left player, 1 for the right
+function miss(loser) {
+  sound.miss();
+  if (state.mode === 'solo') {
+    state.screen = 'over';
+    return;
   }
+  const winner = 1 - loser;
+  state.scores[winner]++;
+  if (state.scores[winner] >= CONFIG.winScore) state.screen = 'over';
+  else serve(loser === 0 ? -1 : 1); // toward the player who conceded
 }
 
 // --- Render ---
@@ -168,40 +231,55 @@ function drawOverlay(lines) {
   ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = '#fff';
-  lines.forEach(([text, size], i) => drawText(text, width / 2, height / 2 - 40 + i * 50, size));
+  lines.forEach(([text, size], i) => drawText(text, width / 2, height / 2 - 60 + i * 50, size));
 }
 
 function render() {
   const { width, height, wall, paddle: P, ball: B } = CONFIG;
+  const solo = state.mode === 'solo';
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, width, height);
 
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, width, wall);
   ctx.fillRect(0, height - wall, width, wall);
-  ctx.fillRect(width - wall, 0, wall, height);
+  if (solo) {
+    ctx.fillRect(width - wall, 0, wall, height);
+  } else {
+    for (let y = wall + 10; y < height - wall; y += 30) ctx.fillRect(width / 2 - 2, y, 4, 15);
+  }
 
-  ctx.fillRect(P.x, state.paddle.y, P.width, P.height);
+  const paddles = solo ? state.paddles.slice(0, 1) : state.paddles;
+  for (const p of paddles) ctx.fillRect(p.x, p.y, P.width, P.height);
   ctx.fillRect(state.ball.x, state.ball.y, B.size, B.size);
 
-  drawText(state.score, width / 2, 80, 48);
-  drawText(`BEST ${state.best}`, width - 30, 45, 18, 'right');
+  if (solo) {
+    drawText(state.scores[0], width / 2, 80, 48);
+    drawText(`BEST ${state.best}`, width - 30, 45, 18, 'right');
+  } else {
+    drawText(state.scores[0], width / 4, 80, 48);
+    drawText(state.scores[1], (width * 3) / 4, 80, 48);
+  }
   if (sound.muted) drawText('MUTED', 30, 45, 18, 'left');
 
-  if (state.mode === 'start') {
+  if (state.screen === 'menu') {
     drawOverlay([
       ['VIBED PONG', 48],
-      ['Press Space to start', 22],
-      ['W/S or ↑/↓ to move · P to pause · M to mute', 16],
+      ['1  Solo against the wall', 22],
+      ['2  Two players', 22],
+      ['P to pause · M to mute', 16],
     ]);
-  } else if (state.mode === 'paused') {
-    drawOverlay([['PAUSED', 48], ['Press P to resume', 22]]);
-  } else if (state.mode === 'over') {
-    drawOverlay([
-      ['GAME OVER', 48],
-      [`Score ${state.score} · Best ${state.best}`, 22],
-      ['Press Space to play again', 16],
-    ]);
+  } else if (state.screen === 'paused') {
+    drawOverlay([['PAUSED', 48], ['Press P to resume', 22], ['Esc for menu', 16]]);
+  } else if (state.screen === 'over') {
+    const [left, right] = state.scores;
+    drawOverlay(solo
+      ? [['GAME OVER', 48], [`Score ${left} · Best ${state.best}`, 22]]
+      : [[left > right ? 'LEFT WINS' : 'RIGHT WINS', 48], [`${left} – ${right}`, 22]]);
+    drawText('Space to play again · Esc for menu', width / 2, height / 2 + 100, 16);
+  } else if (state.serveTimer > 0) {
+    drawText('W/S', width / 4, height - 40, 16);
+    drawText('↑/↓', (width * 3) / 4, height - 40, 16);
   }
 }
 
@@ -218,5 +296,5 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
-resetRound();
+resetField('solo');
 requestAnimationFrame(frame);
