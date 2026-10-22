@@ -17,9 +17,29 @@ Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed
 | `Space` | Play again after a game ends |
 | `Esc` | Back to the menu (when paused or after a game) |
 
+## Aiming
+
+Your paddle doesn't just bounce the ball back. **Where the ball hits your paddle decides where it goes**, like in the original arcade Pong:
+
+```
+  ▐  top edge     →  goes back steeply upward
+  ▐
+  ▐  middle       →  goes back straight
+  ▐
+  ▐  bottom edge  →  goes back steeply downward
+```
+
+The farther from the middle, the steeper the angle. The paddle's very edge gives the steepest shot.
+
+Only that spot matters:
+
+- **The incoming angle doesn't matter.** A ball that comes in steep and hits the middle goes back straight.
+- **Moving the paddle doesn't add spin.** Hitting the ball while you're moving doesn't change its direction or speed.
+
+Steep shots bounce off the top and bottom walls and are harder to reach, especially for the CPU.
+
 ## How the Ball Moves
 
-- **Where you hit it matters.** Hit the ball with the middle of your paddle and it goes back fairly straight. Hit it with the edge and it goes back at a steep angle. Use the edges to aim.
 - **It gets faster.** Every paddle hit makes the ball a little faster, up to about 2½ times its starting speed. The paddle beep gets higher as the ball speeds up.
 - **Walls just bounce it.** The ball bounces off the top and bottom walls, and off the back wall in solo. Only paddle hits change the angle or the speed.
 - **Each serve starts fresh.** The ball starts from the center at its starting speed, heading off at a random angle.
@@ -40,4 +60,4 @@ After each point, the ball waits a second at the center, then serves toward the 
 
 Same rules as two players: you're on the left, the computer is on the right, and first to 11 wins.
 
-The CPU is good but not perfect. Its paddle is slower than yours and it reacts a moment late. It can't predict bounces, so steep shots off your paddle's edge are your best weapon. It also doesn't always hit with the middle of its paddle, so watch for odd angles coming back.
+The CPU is good but not perfect. Its paddle is slower than yours and it reacts a moment late. It can't predict bounces, so steep shots off your paddle's edge are your best weapon (see [Aiming](#aiming)). It also doesn't always hit with the middle of its paddle, so watch for odd angles coming back.

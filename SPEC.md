@@ -36,7 +36,8 @@ Like juggling a football: keep the ball going as long as you can.
 
 - One paddle on the left, moved with `W`/`S` or `↑`/`↓`
 - The other three sides are walls the ball bounces off
-- Where the ball hits the paddle sets its angle, and it gets a bit faster each hit
+- Where the ball hits the paddle sets its angle: straight from the middle, up to 60° from the edge. The incoming angle and paddle movement don't matter.
+- The ball gets a bit faster each hit
 - Each return scores a point. Miss once and the game is over.
 - Best score is kept for the session
 - Start screen, pause (`P`), and game over screen with restart

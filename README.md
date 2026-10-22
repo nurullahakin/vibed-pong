@@ -10,7 +10,7 @@ Classic Pong in the browser, vibe coded with an AI assistant one small version a
 - **Two players:** two people on one keyboard, first to 11
 - **Against the CPU:** play against the computer, first to 11
 
-Controls and rules are in [HOW-TO-PLAY.md](HOW-TO-PLAY.md).
+Your paddle aims: hit the ball with the edge to send it back at a steep angle. Controls, aiming and rules are in [HOW-TO-PLAY.md](HOW-TO-PLAY.md).
 
 ## Run It Yourself
 
