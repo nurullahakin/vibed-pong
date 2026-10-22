@@ -18,6 +18,8 @@ Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed
 | `Space` | Play again after a game ends |
 | `Esc` | Back to the menu (when paused or after a game) |
 
+Your paddle starts slow and speeds up while you hold the key. Tap for a small nudge, hold to get across fast. It stops as soon as you let go.
+
 ## Aiming
 
 Your paddle doesn't just bounce the ball back. **Where the ball hits your paddle decides where it goes**, like in the original arcade Pong:
@@ -63,7 +65,7 @@ After each point, the ball waits a second at the center, then serves toward the 
 
 Same rules as two players: you're on the left, the computer is on the right, and first to 11 wins.
 
-The CPU is good but not perfect. Its paddle is slower than yours and it reacts a moment late. It can't predict bounces, so steep shots off your paddle's edge are your best weapon (see [Aiming](#aiming)). It also doesn't always hit with the middle of its paddle, so watch for odd angles coming back.
+The CPU is good but not perfect. Its paddle never gets as fast as yours, and it reacts a moment late. It can't predict bounces, so steep shots off your paddle's edge are your best weapon (see [Aiming](#aiming)). It also doesn't always hit with the middle of its paddle, so watch for odd angles coming back.
 
 ## Aim Practice
 

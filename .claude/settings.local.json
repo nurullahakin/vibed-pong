@@ -4,7 +4,8 @@
       "PowerShell(node --check game.js)",
       "Bash(npm test *)",
       "Bash(npm run *)",
-      "Bash(node .scratch/smoke.mjs)"
+      "Bash(node .scratch/smoke.mjs)",
+      "Bash(node .scratch/balance.mjs)"
     ]
   }
 }

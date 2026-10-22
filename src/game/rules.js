@@ -15,8 +15,8 @@ export function createState(mode) {
     scores: [0, 0], // solo only uses the first
     over: false,
     paddles: [
-      { x: paddle.inset, y },
-      { x: width - paddle.inset - paddle.width, y },
+      { x: paddle.inset, y, speed: 0, dir: 0 },
+      { x: width - paddle.inset - paddle.width, y, speed: 0, dir: 0 },
     ],
     ball: { x: 0, y: 0, vx: 0, vy: 0, speed: 0 },
     serveTimer: 0,
@@ -80,10 +80,7 @@ export function update(state, dirs, dt) {
   const { mode } = state;
   const hasRightPaddle = mode === 'versus' || mode === 'cpu';
 
-  dirs.forEach((dir, i) => {
-    const p = state.paddles[i];
-    p.y = clamp(p.y + dir * P.speed * dt, wall, height - wall - P.height);
-  });
+  dirs.forEach((dir, i) => movePaddle(state.paddles[i], dir, dt));
   if (mode === 'cpu') moveCpu(state, dt);
 
   // Paddles can move while the ball waits to be served
@@ -132,6 +129,17 @@ export function update(state, dirs, dt) {
   if (b.x + B.size < 0) leaveField(state, 0, events);
   else if (mode !== 'solo' && b.x > width) leaveField(state, 1, events);
   return events;
+}
+
+// Paddles start slow and speed up while the key is held, so a short tap is a
+// small nudge. Letting go stops the paddle at once, and reversing starts slow again.
+function movePaddle(p, dir, dt) {
+  const { height, wall, paddle: P } = CONFIG;
+  if (dir === 0) p.speed = 0;
+  else if (dir !== p.dir) p.speed = P.startSpeed;
+  else p.speed = Math.min(p.speed + P.accel * dt, P.maxSpeed);
+  p.dir = dir;
+  p.y = clamp(p.y + dir * p.speed * dt, wall, height - wall - P.height);
 }
 
 // Paddle 0 sends the ball right, paddle 1 sends it left. prev is where the ball

@@ -59,6 +59,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-10-22** — Paddles now start slow and speed up while a key is held, for finer control. Made the CPU easier to keep the balance.
 - **2026-10-22** — v0.6 built. Also fixed the hit spot on the paddle: it was measured up to a frame late, so angled and fast balls bounced slightly off from where they hit.
 - **2026-10-22** — v0.5 built.
 - **2026-10-21** — v0.4 built.
@@ -74,4 +75,5 @@ Like juggling a football: keep the ball going as long as you can.
 - v0.1 is single-player against a wall: there's only one paddle to build, and it's a quick way to tune the ball physics before adding a second player.
 - Sounds are generated in the browser instead of loaded from audio files, so there's nothing extra to download or license.
 - Aim practice balls all arrive at the paddle's middle line, so the only thing that changes the shot is where you put your paddle. That's the lesson.
-- The CPU has one difficulty, tuned by simulation so an average player wins about 60–75% of games. Difficulty levels can come later if one level isn't enough.
+- The CPU has one difficulty, tuned by simulation so an average player wins about 60–75% of games. Difficulty levels can come later if one level isn't enough. It was retuned when paddle acceleration made players slower to react.
+- Player paddles speed up from 120 to 520 px/s in about a fifth of a second, and stop the moment the key is released, so there's no sliding past the target. The CPU's paddle keeps a steady speed.

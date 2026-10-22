@@ -79,12 +79,20 @@ test('versus: first to 11 wins, and each serve goes to whoever lost the point', 
   assert.deepEqual(state.scores, [0, CONFIG.winScore]);
 });
 
-test('cpu: the computer returns the ball, and beats a player who never moves', () => {
+test('cpu: the computer returns a ball that comes straight at it', () => {
   const state = createState('cpu');
-  const events = play(state, 60 * 600, () => {});
+  state.ball.vx = state.ball.speed;
+  state.ball.vy = 0;
+  const events = play(state, 60 * 5, () => {});
+  assert.ok(events.some((e) => e.type === 'paddle'));
+  assert.equal(state.scores[0], 0, 'the CPU never lost the point');
+});
+
+test('cpu: the computer beats a player who never moves', () => {
+  const state = createState('cpu');
+  play(state, 60 * 600, () => {});
   assert.equal(state.over, true);
   assert.equal(state.scores[1], CONFIG.winScore);
-  assert.ok(events.some((e) => e.type === 'paddle'));
 });
 
 // Steps aim practice until the current ball is hit or a new ball starts
@@ -141,6 +149,25 @@ test('aim: a miss moves on to the next ball and never ends the game', () => {
   }
   assert.equal(state.over, false);
   assert.equal(aimPattern(state).name, 'straight');
+});
+
+test('paddles start slow, speed up while held, and stop when let go', () => {
+  const state = createState('versus');
+  const p = state.paddles[0];
+  const moved = (frames, dir) => {
+    const y = p.y;
+    for (let i = 0; i < frames; i++) update(state, [dir, 0], DT);
+    return Math.abs(p.y - y);
+  };
+
+  const tap = moved(4, 1); // a quick tap, about 1/15 of a second
+  assert.ok(tap < 12, `tap moved ${tap}px`);
+  assert.equal(moved(1, 0), 0); // letting go stops it at once
+
+  moved(30, 1); // hold for half a second
+  assert.equal(p.speed, P.maxSpeed);
+  moved(1, -1); // reversing starts slow again
+  assert.equal(p.speed, P.startSpeed);
 });
 
 test('paddles stay inside the walls', () => {
