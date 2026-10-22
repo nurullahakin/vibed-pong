@@ -33,7 +33,10 @@ export class Game extends Scene {
     }
 
     const shown = onePaddle ? this.state.paddles.slice(0, 1) : this.state.paddles;
-    this.paddles = shown.map((p) => this.add.rectangle(p.x, p.y, P.width, P.height, WHITE).setOrigin(0));
+    this.paddles = shown.map((p) =>
+      mode === 'aim'
+        ? this.add.image(p.x, p.y, this.aimPaddleTexture()).setOrigin(0)
+        : this.add.rectangle(p.x, p.y, P.width, P.height, WHITE).setOrigin(0));
     this.ball = this.add.rectangle(0, 0, B.size, B.size, WHITE).setOrigin(0);
 
     if (mode === 'solo') {
@@ -97,6 +100,26 @@ export class Game extends Scene {
     } else {
       this.serveHints.forEach((text) => text.setVisible(s.serveTimer > 0));
     }
+  }
+
+  // Colors the aim practice paddle by where it sends the ball: blue at the top
+  // (steep up), white in the middle (straight), red at the bottom (steep down).
+  // The angle changes evenly along the paddle, so a smooth gradient matches it.
+  aimPaddleTexture() {
+    const key = 'aim-paddle';
+    if (!this.textures.exists(key)) {
+      const { width, height } = CONFIG.paddle;
+      const texture = this.textures.createCanvas(key, width, height);
+      const ctx = texture.getContext();
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, '#4a8cff');
+      gradient.addColorStop(0.5, '#ffffff');
+      gradient.addColorStop(1, '#ff4a4a');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      texture.refresh();
+    }
+    return key;
   }
 
   // Aim practice shows where the ball hit the paddle and the path it took after

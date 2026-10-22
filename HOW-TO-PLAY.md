@@ -32,7 +32,7 @@ Your paddle doesn't just bounce the ball back. **Where the ball hits your paddle
   ▐  bottom edge  →  goes back steeply downward
 ```
 
-The farther from the middle, the steeper the angle. The paddle's very edge gives the steepest shot.
+The farther from the middle, the steeper the angle, and it changes smoothly. Halfway between the middle and an edge gives half the steepest angle. The paddle's very edge gives the steepest shot, 60°.
 
 Only that spot matters:
 
@@ -70,6 +70,8 @@ The CPU is good but not perfect. Its paddle never gets as fast as yours, and it 
 ## Aim Practice
 
 Balls come at you one at a time: first straight, then from above, then from below, and around again. Each one heads for the middle of your paddle's line.
+
+Your paddle is colored to show where it sends the ball: **blue** at the top sends it up, **white** in the middle sends it straight, and **red** at the bottom sends it down. The deeper the color, the steeper the shot.
 
 Move your paddle so the ball hits a different part of it, and see what happens. After each hit:
 

@@ -10,6 +10,7 @@ Built with Phaser 4 and Vite, and published on GitHub Pages.
 - Balls come one at a time, aimed at the middle of your paddle: straight, from above, from below, then again
 - After a hit, the ball flies for a moment showing its path, then the next one comes. A label says where you hit and what it did, for example "Top edge → steep up, 54°".
 - No score and no game over. A miss just brings the next ball.
+- The paddle has a color gradient, blue at the top through white to red at the bottom, matching how the angle changes along it
 
 ## v0.5 — Phaser Port (done)
 
