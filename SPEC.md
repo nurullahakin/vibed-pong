@@ -4,7 +4,17 @@ A 2D Pong game in the browser. Start small, add features later.
 
 Built with Phaser 4 and Vite, and published on GitHub Pages.
 
-## v0.6 — Aim Practice (now)
+## v0.7 — Visual Polish (now)
+
+The same game with more feel. Still black and white.
+
+- A fading trail behind the ball, longer as it speeds up
+- Sparks where the ball hits a paddle or wall, more when it's faster
+- Paddles squash for a moment on each hit, and scores pop when they change
+- A short screen shake on a miss, skipped if your system asks for reduced motion
+- Menu and games fade in. The game over screen waits half a second so you see the miss.
+
+## v0.6 — Aim Practice (done)
 
 - `4` on the start screen opens a practice mode for aiming
 - Balls come one at a time, aimed at the middle of your paddle: straight, from above, from below, then again
@@ -54,12 +64,12 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Later
 
-1. Visual polish
-2. Power-ups
-3. Online multiplayer
+1. Power-ups
+2. Online multiplayer
 
 ## Progress
 
+- **2026-10-22** — v0.7 built.
 - **2026-10-22** — Paddles now start slow and speed up while a key is held, for finer control. Made the CPU easier to keep the balance.
 - **2026-10-22** — v0.6 built. Also fixed the hit spot on the paddle: it was measured up to a frame late, so angled and fast balls bounced slightly off from where they hit.
 - **2026-10-22** — v0.5 built.
@@ -72,6 +82,7 @@ Like juggling a football: keep the ball going as long as you can.
 ## Decisions
 
 - v0.1–v0.4 used no framework, to keep things simple. v0.5 moved to Phaser 4 for structure and for its polish tools (particles, tweens, camera effects). It uses Vite, the setup Phaser's own starter tool uses.
+- Effects only react to events from the rules and never change the game, so they can be tuned or turned off freely. They live in `src/effects.js`.
 - Ball and paddle collisions use our own code. Phaser's built-in physics only checks for overlaps once per frame, so a fast ball could pass through a thin paddle.
 - v0.1 is single-player against a wall: there's only one paddle to build, and it's a quick way to tune the ball physics before adding a second player.
 - Sounds are generated in the browser instead of loaded from audio files, so there's nothing extra to download or license.

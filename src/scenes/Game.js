@@ -1,6 +1,7 @@
 import { Scene } from 'phaser';
 import { CONFIG, CONTROLS } from '../game/config.js';
 import * as rules from '../game/rules.js';
+import { Effects } from '../effects.js';
 import { playEvents } from '../sound.js';
 import { addText, addMutedLabel, bindMuteKey } from '../ui.js';
 
@@ -14,6 +15,8 @@ export class Game extends Scene {
 
   init(data) {
     this.mode = data.mode;
+    // Phaser reuses the scene object when a game restarts, so reset per-game flags
+    this.ending = false;
   }
 
   create() {
@@ -33,11 +36,13 @@ export class Game extends Scene {
     }
 
     const shown = onePaddle ? this.state.paddles.slice(0, 1) : this.state.paddles;
-    this.paddles = shown.map((p) =>
+    // Paddles are positioned by their center, so they squash evenly on a hit
+    this.paddles = shown.map(() =>
       mode === 'aim'
-        ? this.add.image(p.x, p.y, this.aimPaddleTexture()).setOrigin(0)
-        : this.add.rectangle(p.x, p.y, P.width, P.height, WHITE).setOrigin(0));
+        ? this.add.image(0, 0, this.aimPaddleTexture())
+        : this.add.rectangle(0, 0, P.width, P.height, WHITE));
     this.ball = this.add.rectangle(0, 0, B.size, B.size, WHITE).setOrigin(0);
+    this.effects = new Effects(this, this.paddles);
 
     if (mode === 'solo') {
       this.scoreTexts = [addText(this, width / 2, 62, '0', 48)];
@@ -56,12 +61,15 @@ export class Game extends Scene {
 
     this.keys = this.input.keyboard.addKeys('W,S,UP,DOWN');
     this.input.keyboard.on('keydown-P', () => {
+      if (this.ending) return;
+      this.cameras.main.resetFX(); // don't freeze mid-shake
       this.scene.pause();
       this.scene.launch('Pause');
     });
     bindMuteKey(this);
     addMutedLabel(this);
     this.sync();
+    this.cameras.main.fadeIn(250);
   }
 
   update(time, delta) {
@@ -70,15 +78,21 @@ export class Game extends Scene {
     const held = (names) => names.some((k) => this.keys[k].isDown);
     const dirs = CONTROLS[this.mode].map(({ up, down }) => (held(down) ? 1 : 0) - (held(up) ? 1 : 0));
 
-    playEvents(this.sound, rules.update(this.state, dirs, dt));
+    const events = rules.update(this.state, dirs, dt);
+    playEvents(this.sound, events);
+    this.effects.play(events, this.state);
     this.sync();
 
-    if (this.state.over) {
-      this.scene.pause();
-      this.scene.launch('GameOver', {
-        mode: this.mode,
-        scores: [...this.state.scores],
-        best: this.registry.get('best'),
+    // Wait a moment before the game over screen, so the last miss can be seen
+    if (this.state.over && !this.ending) {
+      this.ending = true;
+      this.time.delayedCall(500, () => {
+        this.scene.pause();
+        this.scene.launch('GameOver', {
+          mode: this.mode,
+          scores: [...this.state.scores],
+          best: this.registry.get('best'),
+        });
       });
     }
   }
@@ -86,9 +100,14 @@ export class Game extends Scene {
   // Moves the shapes and updates the text to match the game state
   sync() {
     const s = this.state;
-    this.paddles.forEach((rect, i) => rect.setPosition(s.paddles[i].x, s.paddles[i].y));
+    const { paddle: P } = CONFIG;
+    this.paddles.forEach((shape, i) => shape.setPosition(s.paddles[i].x + P.width / 2, s.paddles[i].y + P.height / 2));
     this.ball.setPosition(s.ball.x, s.ball.y);
-    this.scoreTexts.forEach((text, i) => text.setText(s.scores[i]));
+    this.scoreTexts.forEach((text, i) => {
+      if (text.text === String(s.scores[i])) return;
+      text.setText(s.scores[i]);
+      this.effects.pop(text);
+    });
 
     if (this.mode === 'solo') {
       // Best score lives in the registry so it survives between games

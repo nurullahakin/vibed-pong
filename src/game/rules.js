@@ -72,7 +72,7 @@ export function serve(state, dir) {
 
 // Moves everything forward by dt seconds. dirs holds each human paddle's input,
 // left first: -1 up, 1 down, 0 still. Returns what happened this frame, e.g.
-// [{ type: 'wall' }, { type: 'paddle', speed }, { type: 'miss' }].
+// [{ type: 'wall', wall: 'top' }, { type: 'paddle', paddle: 0, speed }, { type: 'miss', side: 1 }].
 export function update(state, dirs, dt) {
   const events = [];
   if (state.over) return events;
@@ -106,16 +106,16 @@ export function update(state, dirs, dt) {
   if (b.y < wall) {
     b.y = wall;
     b.vy = Math.abs(b.vy);
-    events.push({ type: 'wall' });
+    events.push({ type: 'wall', wall: 'top' });
   } else if (b.y + B.size > height - wall) {
     b.y = height - wall - B.size;
     b.vy = -Math.abs(b.vy);
-    events.push({ type: 'wall' });
+    events.push({ type: 'wall', wall: 'bottom' });
   }
   if (mode === 'solo' && b.x + B.size > width - wall) {
     b.x = width - wall - B.size;
     b.vx = -Math.abs(b.vx);
-    events.push({ type: 'wall' });
+    events.push({ type: 'wall', wall: 'right' });
   }
 
   const hit = hitPaddle(state, 0, prev, events);
@@ -173,7 +173,7 @@ function hitPaddle(state, index, prev, events) {
   b.speed = Math.min(b.speed * B.speedUp, B.maxSpeed);
   b.vx = dir * b.speed * Math.cos(angle);
   b.vy = b.speed * Math.sin(angle);
-  events.push({ type: 'paddle', speed: b.speed });
+  events.push({ type: 'paddle', paddle: index, speed: b.speed });
   return offset;
 }
 
@@ -181,12 +181,12 @@ function hitPaddle(state, index, prev, events) {
 function leaveField(state, side, events) {
   if (state.mode === 'aim') {
     // Leaving on the right means it was hit. Either way, on to the next ball.
-    if (side === 0) events.push({ type: 'miss' });
+    if (side === 0) events.push({ type: 'miss', side });
     nextAimBall(state);
     return;
   }
   const loser = side;
-  events.push({ type: 'miss' });
+  events.push({ type: 'miss', side });
   if (state.mode === 'solo') {
     state.over = true;
     return;

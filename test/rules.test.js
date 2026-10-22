@@ -48,7 +48,7 @@ test('solo: one miss ends the game', () => {
   const events = play(state, 60 * 30, () => dodge(state, 0));
   assert.equal(state.over, true);
   assert.equal(state.scores[0], 0);
-  assert.deepEqual(events.at(-1), { type: 'miss' });
+  assert.deepEqual(events.at(-1), { type: 'miss', side: 0 });
 });
 
 test('versus: the ball waits before each serve', () => {
@@ -145,7 +145,7 @@ test('aim: a miss moves on to the next ball and never ends the game', () => {
       dodge(state, 0);
       events = update(state, [0], DT);
     }
-    assert.deepEqual(events, [{ type: 'miss' }]);
+    assert.deepEqual(events, [{ type: 'miss', side: 0 }]);
   }
   assert.equal(state.over, false);
   assert.equal(aimPattern(state).name, 'straight');

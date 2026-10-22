@@ -20,6 +20,8 @@ Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed
 
 Your paddle starts slow and speeds up while you hold the key. Tap for a small nudge, hold to get across fast. It stops as soon as you let go.
 
+If your device is set to reduce motion, the screen won't shake when someone misses.
+
 ## Aiming
 
 Your paddle doesn't just bounce the ball back. **Where the ball hits your paddle decides where it goes**, like in the original arcade Pong:

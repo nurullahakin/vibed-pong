@@ -29,5 +29,6 @@ export class MainMenu extends Scene {
     }
     bindMuteKey(this);
     addMutedLabel(this);
+    this.cameras.main.fadeIn(300);
   }
 }
