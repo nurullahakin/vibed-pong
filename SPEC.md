@@ -2,9 +2,16 @@
 
 A 2D Pong game in the browser. Start small, add features later.
 
-Built with plain JavaScript and an HTML5 canvas. Open `index.html` to play.
+Built with Phaser 4 and Vite, and published on GitHub Pages.
 
-## v0.4 — CPU Opponent (now)
+## v0.5 — Phaser Port (now)
+
+- The same game, rebuilt on Phaser 4. The menu, game, pause and game over screens are each a scene.
+- The game rules live in `src/game/` with no Phaser, so a multiplayer server can reuse them
+- Every push to `main` is tested, built and published to GitHub Pages
+- `npm test` plays the rules without a browser
+
+## v0.4 — CPU Opponent (done)
 
 - `3` on the start screen plays against the computer, which controls the right paddle
 - Same rules as two players. You can move with `W`/`S` or `↑`/`↓`.
@@ -44,6 +51,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-10-22** — v0.5 built.
 - **2026-10-21** — v0.4 built.
 - **2026-10-21** — v0.3 built.
 - **2026-10-21** — v0.2 built.
@@ -52,7 +60,8 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Decisions
 
-- No framework or build step to keep it simple. Revisit if multiplayer needs one.
+- v0.1–v0.4 used no framework, to keep things simple. v0.5 moved to Phaser 4 for structure and for its polish tools (particles, tweens, camera effects). It uses Vite, the setup Phaser's own starter tool uses.
+- Ball and paddle collisions use our own code. Phaser's built-in physics only checks for overlaps once per frame, so a fast ball could pass through a thin paddle.
 - v0.1 is single-player against a wall: there's only one paddle to build, and it's a quick way to tune the ball physics before adding a second player.
 - Sounds are generated in the browser instead of loaded from audio files, so there's nothing extra to download or license.
 - The CPU has one difficulty, tuned by simulation so an average player wins about 60–75% of games. Difficulty levels can come later if one level isn't enough.

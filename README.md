@@ -2,13 +2,7 @@
 
 Classic Pong in the browser, vibe coded with an AI assistant one small version at a time.
 
-## Play
-
-Download or clone the repo and open `index.html` in a browser. There's nothing to install or build.
-
-```sh
-git clone https://github.com/nurullahakin/vibed-pong.git
-```
+**Play it at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed-pong/).**
 
 ## Modes
 
@@ -18,12 +12,27 @@ git clone https://github.com/nurullahakin/vibed-pong.git
 
 Controls and rules are in [HOW-TO-PLAY.md](HOW-TO-PLAY.md).
 
+## Run It Yourself
+
+You need [Node.js](https://nodejs.org) 22 or newer.
+
+```sh
+npm install
+npm run dev     # play locally, reloads as you edit
+npm test        # check the game rules
+npm run build   # build the site into dist/
+```
+
+Every push to `main` is tested, built and published to GitHub Pages.
+
 ## Project
 
-| File | What's in it |
+| Where | What's in it |
 |---|---|
+| [src/game/](src/game/) | Game rules and tuning values, in plain JavaScript with no Phaser |
+| [src/scenes/](src/scenes/) | Phaser scenes: menu, game, pause, game over |
 | [SPEC.md](SPEC.md) | Scope, roadmap, progress and decisions |
 | [HOW-TO-PLAY.md](HOW-TO-PLAY.md) | Player guide |
 | [CLAUDE.md](CLAUDE.md) | Instructions for the AI, including the prompt that started the project |
 
-It's plain JavaScript on an HTML5 canvas, with no dependencies. Sounds are generated in the browser, so there are no asset files. Speeds, sizes and CPU difficulty are in the `CONFIG` block at the top of [game.js](game.js).
+Built with [Phaser 4](https://phaser.io) and [Vite](https://vite.dev). Sounds are generated in the browser, so there are no asset files. Speeds, sizes and CPU difficulty are in [src/game/config.js](src/game/config.js).

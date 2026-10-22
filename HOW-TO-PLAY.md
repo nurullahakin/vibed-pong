@@ -1,6 +1,6 @@
 # How to Play Vibed Pong
 
-Open `index.html` in your browser. Pick a mode on the start screen:
+Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed-pong/). Pick a mode on the start screen:
 
 - **1 — Solo:** keep the ball going against a wall
 - **2 — Two players:** play against a friend on the same keyboard
