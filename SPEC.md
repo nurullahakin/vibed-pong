@@ -4,7 +4,14 @@ A 2D Pong game in the browser. Start small, add features later.
 
 Built with Phaser 4 and Vite, and published on GitHub Pages.
 
-## v0.5 — Phaser Port (now)
+## v0.6 — Aim Practice (now)
+
+- `4` on the start screen opens a practice mode for aiming
+- Balls come one at a time, aimed at the middle of your paddle: straight, from above, from below, then again
+- After a hit, the ball flies for a moment showing its path, then the next one comes. A label says where you hit and what it did, for example "Top edge → steep up, 54°".
+- No score and no game over. A miss just brings the next ball.
+
+## v0.5 — Phaser Port (done)
 
 - The same game, rebuilt on Phaser 4. The menu, game, pause and game over screens are each a scene.
 - The game rules live in `src/game/` with no Phaser, so a multiplayer server can reuse them
@@ -52,6 +59,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-10-22** — v0.6 built. Also fixed the hit spot on the paddle: it was measured up to a frame late, so angled and fast balls bounced slightly off from where they hit.
 - **2026-10-22** — v0.5 built.
 - **2026-10-21** — v0.4 built.
 - **2026-10-21** — v0.3 built.
@@ -65,4 +73,5 @@ Like juggling a football: keep the ball going as long as you can.
 - Ball and paddle collisions use our own code. Phaser's built-in physics only checks for overlaps once per frame, so a fast ball could pass through a thin paddle.
 - v0.1 is single-player against a wall: there's only one paddle to build, and it's a quick way to tune the ball physics before adding a second player.
 - Sounds are generated in the browser instead of loaded from audio files, so there's nothing extra to download or license.
+- Aim practice balls all arrive at the paddle's middle line, so the only thing that changes the shot is where you put your paddle. That's the lesson.
 - The CPU has one difficulty, tuned by simulation so an average player wins about 60–75% of games. Difficulty levels can come later if one level isn't enough.

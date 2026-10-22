@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../src/game/config.js';
-import { createState, update } from '../src/game/rules.js';
+import { aimPattern, createState, update } from '../src/game/rules.js';
 
 const DT = 1 / 60;
 const { width, height, paddle: P } = CONFIG;
@@ -85,6 +85,62 @@ test('cpu: the computer returns the ball, and beats a player who never moves', (
   assert.equal(state.over, true);
   assert.equal(state.scores[1], CONFIG.winScore);
   assert.ok(events.some((e) => e.type === 'paddle'));
+});
+
+// Steps aim practice until the current ball is hit or a new ball starts
+function playAimBall(state, beforeEachFrame = () => {}) {
+  const id = state.aim.ballId;
+  for (let i = 0; i < 60 * 10; i++) {
+    beforeEachFrame();
+    update(state, [0], DT);
+    if (state.aim.lastHit !== null || state.aim.ballId !== id) return;
+  }
+  throw new Error('ball never arrived');
+}
+
+test('aim: balls come straight, from above, then from below, aimed at the middle', () => {
+  const state = createState('aim');
+  const seen = [];
+  for (let n = 0; n < 4; n++) {
+    seen.push(aimPattern(state).name);
+    const vy = state.ball.vy;
+    playAimBall(state); // the paddle stays in the middle
+    assert.ok(Math.abs(state.aim.lastHit) < 0.05, `hit ${state.aim.lastHit}`);
+    if (n === 1) assert.ok(vy > 0, 'from above heads down');
+    if (n === 2) assert.ok(vy < 0, 'from below heads up');
+    while (state.aim.lastHit !== null) update(state, [0], DT); // wait for the next ball
+  }
+  assert.deepEqual(seen, ['straight', 'from above', 'from below', 'straight']);
+});
+
+test('aim: the same spot on the paddle gives the same shot, whatever the incoming angle', () => {
+  const state = createState('aim');
+  const shots = [];
+  for (let n = 0; n < 3; n++) {
+    // Line the paddle up so the ball meets it near the top edge
+    playAimBall(state, () => { state.paddles[0].y = height / 2 - 5; });
+    const { vx, vy } = state.ball;
+    shots.push((Math.atan2(vy, vx) * 180) / Math.PI);
+    assert.ok(state.aim.lastHit < -0.8);
+    while (state.aim.lastHit !== null) update(state, [0], DT);
+  }
+  assert.ok(Math.max(...shots) - Math.min(...shots) < 0.01, `angles ${shots}`);
+  assert.ok(shots[0] < -45, 'steep upward');
+});
+
+test('aim: a miss moves on to the next ball and never ends the game', () => {
+  const state = createState('aim');
+  for (let n = 0; n < 3; n++) {
+    const id = state.aim.ballId;
+    let events = [];
+    while (state.aim.ballId === id) {
+      dodge(state, 0);
+      events = update(state, [0], DT);
+    }
+    assert.deepEqual(events, [{ type: 'miss' }]);
+  }
+  assert.equal(state.over, false);
+  assert.equal(aimPattern(state).name, 'straight');
 });
 
 test('paddles stay inside the walls', () => {

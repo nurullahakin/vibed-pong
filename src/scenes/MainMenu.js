@@ -3,7 +3,7 @@ import { CONFIG } from '../game/config.js';
 import { addText, addMutedLabel, bindMuteKey } from '../ui.js';
 
 // Number key for each mode
-const MODES = { ONE: 'solo', TWO: 'versus', THREE: 'cpu' };
+const MODES = { ONE: 'solo', TWO: 'versus', THREE: 'cpu', FOUR: 'aim' };
 
 export class MainMenu extends Scene {
   constructor() {
@@ -17,9 +17,10 @@ export class MainMenu extends Scene {
       ['1  Solo against the wall', 22],
       ['2  Two players', 22],
       ['3  Against the CPU', 22],
+      ['4  Aim practice', 22],
       ['P to pause · M to mute', 16],
     ];
-    lines.forEach(([text, size], i) => addText(this, width / 2, height / 2 - 120 + i * 55, text, size));
+    lines.forEach(([text, size], i) => addText(this, width / 2, height / 2 - 140 + i * 55, text, size));
 
     for (const [key, mode] of Object.entries(MODES)) {
       const start = () => this.scene.start('Game', { mode });

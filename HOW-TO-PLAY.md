@@ -5,6 +5,7 @@ Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed
 - **1 — Solo:** keep the ball going against a wall
 - **2 — Two players:** play against a friend on the same keyboard
 - **3 — Against the CPU:** play against the computer
+- **4 — Aim practice:** learn how to aim with your paddle
 
 ## Controls
 
@@ -38,6 +39,8 @@ Only that spot matters:
 
 Steep shots bounce off the top and bottom walls and are harder to reach, especially for the CPU.
 
+To try it out, pick **Aim practice** on the start screen. See [Aim Practice](#aim-practice) below.
+
 ## How the Ball Moves
 
 - **It gets faster.** Every paddle hit makes the ball a little faster, up to about 2½ times its starting speed. The paddle beep gets higher as the ball speeds up.
@@ -61,3 +64,17 @@ After each point, the ball waits a second at the center, then serves toward the 
 Same rules as two players: you're on the left, the computer is on the right, and first to 11 wins.
 
 The CPU is good but not perfect. Its paddle is slower than yours and it reacts a moment late. It can't predict bounces, so steep shots off your paddle's edge are your best weapon (see [Aiming](#aiming)). It also doesn't always hit with the middle of its paddle, so watch for odd angles coming back.
+
+## Aim Practice
+
+Balls come at you one at a time: first straight, then from above, then from below, and around again. Each one heads for the middle of your paddle's line.
+
+Move your paddle so the ball hits a different part of it, and see what happens. After each hit:
+
+- a line shows the path the ball took
+- a small mark on your paddle shows where the ball touched it
+- the top of the screen tells you what you did, for example "Top edge → steep up, 54°"
+
+Try hitting all three balls with the same part of the paddle. They all go back the same way, whatever direction they came from.
+
+There's no score and no game over. If you miss, the next ball comes. Press `P`, then `Esc` to go back to the menu.

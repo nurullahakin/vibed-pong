@@ -9,6 +9,7 @@ Classic Pong in the browser, vibe coded with an AI assistant one small version a
 - **Solo:** keep the ball going against a wall and beat your best score
 - **Two players:** two people on one keyboard, first to 11
 - **Against the CPU:** play against the computer, first to 11
+- **Aim practice:** balls from three angles, to learn how your paddle aims
 
 Your paddle aims: hit the ball with the edge to send it back at a steep angle. Controls, aiming and rules are in [HOW-TO-PLAY.md](HOW-TO-PLAY.md).
 

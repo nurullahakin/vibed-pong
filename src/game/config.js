@@ -16,6 +16,16 @@ export const CONFIG = {
     reaction: 0.2, // seconds between looks at the ball
     aimError: 30, // how far off-center it may aim, in pixels
   },
+  aim: {
+    // Aim practice balls, in order. Each heads for the middle of the paddle's line.
+    patterns: [
+      { name: 'straight', angle: 0 },
+      { name: 'from above', angle: 35 }, // degrees, heading down
+      { name: 'from below', angle: -35 },
+    ],
+    distance: 380, // how far from the paddle each ball starts, in pixels
+    showTime: 1.5, // seconds the ball keeps flying after a hit, so you see where it went
+  },
   volume: 0.15,
 };
 
@@ -25,6 +35,7 @@ const EITHER_KEYS = { up: ['W', 'UP'], down: ['S', 'DOWN'] };
 export const CONTROLS = {
   solo: [EITHER_KEYS],
   cpu: [EITHER_KEYS],
+  aim: [EITHER_KEYS],
   versus: [
     { up: ['W'], down: ['S'] },
     { up: ['UP'], down: ['DOWN'] },
