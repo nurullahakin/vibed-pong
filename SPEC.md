@@ -86,6 +86,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-10-23** — Fixed online matches running at about 58% speed on Windows. The server now follows the real clock.
 - **2026-10-23** — FPS and ping are shown in the top-right corner of every screen.
 - **2026-10-23** — Buttons no longer say "(Esc)". Esc still works everywhere it did.
 - **2026-10-23** — The room name and your own name can also be changed from inside a room.
@@ -115,6 +116,7 @@ Like juggling a football: keep the ball going as long as you can.
 - Your player name is remembered in the browser's local storage and sent again on every connect. If storage is blocked, as in some private windows, you just start as "Player N" again.
 - Either player in a room can rename it, since a room is just two friends with no host. Renaming is blocked mid-match.
 - Room and player names are cleaned on the server: trimmed, invisible characters removed, and cut to 24 characters for rooms or 16 for players. An empty room name gets a random one; an empty player name is ignored.
+- The server steps online matches by the real time that has passed, in fixed 1/60 s steps. Timers aren't exact (on Windows, a 60-a-second timer fires about 35 times), so stepping once per timer tick made everything slow.
 - Ping is timed with a small message the server sends straight back, every 2 seconds. FPS is Phaser's own measure. Both turn orange when poor: under 50 FPS, or over 150 ms.
 - Online has no prediction yet, so your own paddle lags by your round trip to the server. Fine on a good connection, and simple to start with.
 - All colors and the font live in `src/theme.js`, and the game draws its own images in `src/textures.js`, so the look can change in one place and there are still no asset files.

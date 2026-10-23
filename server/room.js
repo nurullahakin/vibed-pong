@@ -5,6 +5,11 @@
 import { createState, update } from '../src/game/rules.js';
 
 const TICK = 1 / 60; // seconds per game step
+// Timers aren't exact: on Windows, one asked to fire 60 times a second fires about
+// 35 times. So the loop checks twice as often as needed, and each check runs as
+// many game steps as the real time that has passed calls for.
+const CHECK_EVERY = (TICK * 1000) / 2; // milliseconds
+const MAX_CATCH_UP = 0.25; // seconds; after a long stall, don't fast-forward further
 const COUNTDOWN = 3; // seconds
 
 // player: { id, name, send(message) }
@@ -101,11 +106,23 @@ export class Room {
       p.dir = 0;
       p.player.send({ type: 'start', seat });
     });
-    this.timer = setInterval(() => this.tick(), TICK * 1000);
+    this.lastTick = Date.now();
+    this.unplayed = 0; // seconds of real time not yet turned into game steps
+    this.timer = setInterval(() => this.tick(), CHECK_EVERY);
   }
 
   tick() {
-    const events = update(this.state, this.players.map((p) => p.dir), TICK);
+    const now = Date.now();
+    this.unplayed = Math.min(this.unplayed + (now - this.lastTick) / 1000, MAX_CATCH_UP);
+    this.lastTick = now;
+    if (this.unplayed < TICK) return; // too early for the next step
+
+    const events = [];
+    const dirs = this.players.map((p) => p.dir);
+    while (this.unplayed >= TICK && !this.state.over) {
+      events.push(...update(this.state, dirs, TICK));
+      this.unplayed -= TICK;
+    }
     this.broadcast({ type: 'state', state: snapshot(this.state), events });
     if (this.state.over) {
       const { scores } = this.state;

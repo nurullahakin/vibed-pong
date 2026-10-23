@@ -10,8 +10,14 @@ function fakePlayer(name) {
   return { name, inbox, send: (m) => inbox.push(m), last: (type) => inbox.filter((m) => m.type === type).at(-1) };
 }
 
+// Moves the fake clock forward a little at a time, like a real one. A single big
+// mock tick would show every timer callback the end time at once.
+function advance(ms) {
+  for (let t = 0; t < ms; t += 5) mock.timers.tick(5);
+}
+
 function setup() {
-  mock.timers.enable({ apis: ['setInterval'] });
+  mock.timers.enable({ apis: ['setInterval', 'Date'] });
   const room = new Room('TEST', 'Test Room', () => {});
   const a = fakePlayer('A');
   const b = fakePlayer('B');
@@ -45,7 +51,7 @@ test('room: either player can rename it, but not mid-match or from outside', (t)
   assert.equal(room.name, 'Friday Night');
   room.setReady(a, true);
   room.setReady(b, true);
-  mock.timers.tick(3000);
+  advance(3000);
   room.rename(a, 'Mid Match');
   assert.equal(room.name, 'Friday Night');
 });
@@ -59,13 +65,29 @@ test('room: the match starts after both are ready and a countdown', (t) => {
   assert.equal(room.status, 'countdown');
   assert.equal(a.last('countdown').seconds, 3);
 
-  mock.timers.tick(3000);
+  advance(3000);
   assert.equal(room.status, 'playing');
   assert.deepEqual(a.last('start'), { type: 'start', seat: 0 });
   assert.deepEqual(b.last('start'), { type: 'start', seat: 1 });
 
-  mock.timers.tick(1000);
+  advance(1000);
   assert.ok(a.inbox.filter((m) => m.type === 'state').length >= 50, 'about 60 updates a second');
+});
+
+test('room: the game follows real time, even when the timer fires late', (t) => {
+  t.after(() => mock.timers.reset());
+  const { room, a, b } = setup();
+  room.setReady(a, true);
+  room.setReady(b, true);
+  advance(3000 + 1000); // countdown, then the 1 second serve wait
+  const before = room.state.ball.x;
+  // Stop the timer and let 100 ms pass at once, like a late timer on Windows
+  clearInterval(room.timer);
+  advance(100);
+  room.tick();
+  const moved = Math.abs(room.state.ball.x - before);
+  const expected = room.state.ball.speed * 0.1 * Math.abs(room.state.ball.vx) / room.state.ball.speed;
+  assert.ok(Math.abs(moved - expected) < 6, `moved ${moved.toFixed(1)}px, expected about ${expected.toFixed(1)}px`);
 });
 
 test('room: un-readying during the countdown cancels it', (t) => {
@@ -75,7 +97,7 @@ test('room: un-readying during the countdown cancels it', (t) => {
   room.setReady(b, true);
   room.setReady(b, false);
   assert.equal(room.status, 'waiting');
-  mock.timers.tick(5000);
+  advance(5000);
   assert.equal(a.last('start'), undefined);
 });
 
@@ -84,10 +106,10 @@ test('room: inputs move the right paddle', (t) => {
   const { room, a, b } = setup();
   room.setReady(a, true);
   room.setReady(b, true);
-  mock.timers.tick(3000);
+  advance(3000);
   const startY = a.last('state')?.state.paddles[1].y ?? room.state.paddles[1].y;
   room.input(b, 1);
-  mock.timers.tick(500);
+  advance(500);
   const { paddles } = a.last('state').state;
   assert.ok(paddles[1].y > startY, 'right paddle moved down');
   assert.equal(paddles[0].y, startY, 'left paddle stayed');
@@ -98,9 +120,9 @@ test('room: a full match ends, and both go back to waiting, not ready', (t) => {
   const { room, a, b } = setup();
   room.setReady(a, true);
   room.setReady(b, true);
-  mock.timers.tick(3000);
+  advance(3000);
   // Nobody moves, so points keep coming until someone reaches 11
-  for (let i = 0; i < 600 && room.status === 'playing'; i++) mock.timers.tick(1000);
+  for (let i = 0; i < 600 && room.status === 'playing'; i++) advance(1000);
   const over = a.last('over');
   assert.ok(over, 'match ended');
   assert.equal(Math.max(...over.scores), 11);
@@ -113,13 +135,13 @@ test('room: if a player leaves mid-match, the other is told and the match stops'
   const { room, a, b } = setup();
   room.setReady(a, true);
   room.setReady(b, true);
-  mock.timers.tick(4000);
+  advance(4000);
   room.leave(b);
   assert.equal(room.status, 'waiting');
   const message = a.last('room');
   assert.equal(message.room.notice, 'Your opponent left');
   assert.equal(message.room.players.length, 1);
   const updates = a.inbox.length;
-  mock.timers.tick(2000);
+  advance(2000);
   assert.equal(a.inbox.length, updates, 'no more game updates');
 });
