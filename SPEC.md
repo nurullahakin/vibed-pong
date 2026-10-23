@@ -86,6 +86,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-10-23** — The online server is live on Render, and the site connects to it.
 - **2026-10-23** — Fixed online matches running at about 58% speed on Windows. The server now follows the real clock.
 - **2026-10-23** — FPS and ping are shown in the top-right corner of every screen.
 - **2026-10-23** — Buttons no longer say "(Esc)". Esc still works everywhere it did.
