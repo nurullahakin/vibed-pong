@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 import { CONFIG } from '../game/config.js';
-import { addMenu, addOverlay, bindMuteKey } from '../ui.js';
+import { addCard, addMenu, bindMuteKey } from '../ui.js';
 
 // Shown on top of the finished Game scene
 export class GameOver extends Scene {
@@ -13,9 +13,9 @@ export class GameOver extends Scene {
   }
 
   create() {
-    const { width, height } = CONFIG;
+    const { width } = CONFIG;
     const { mode, scores: [left, right], best } = this.result;
-    const names = mode === 'cpu' ? ['YOU WIN', 'CPU WINS'] : ['LEFT WINS', 'RIGHT WINS'];
+    const names = mode === 'cpu' ? ['You win', 'The CPU wins'] : ['Left wins', 'Right wins'];
     // Starting Game again restarts it from scratch
     const playAgain = () => this.scene.start('Game', { mode });
     const toMenu = () => {
@@ -23,11 +23,11 @@ export class GameOver extends Scene {
       this.scene.start('MainMenu');
     };
 
-    addOverlay(this, mode === 'solo'
-      ? [['GAME OVER', 48], [`Score ${left} · Best ${best}`, 22]]
-      : [[left > right ? names[0] : names[1], 48], [`${left} – ${right}`, 22]]);
+    const top = mode === 'solo'
+      ? addCard(this, 290, 'Game over', `Score ${left}  ·  Best ${best}`)
+      : addCard(this, 290, left > right ? names[0] : names[1], `${left} – ${right}`);
     // Play again starts highlighted, so Space or Enter plays again straight away
-    addMenu(this, width / 2, height / 2 + 40, 55, [['Play again', playAgain], ['Menu (Esc)', toMenu]]);
+    addMenu(this, width / 2, top + 165, 62, [['Play again', playAgain], ['Menu (Esc)', toMenu]]);
 
     this.input.keyboard.on('keydown-ESC', toMenu);
     bindMuteKey(this);

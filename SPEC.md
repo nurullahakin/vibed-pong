@@ -4,9 +4,19 @@ A 2D Pong game in the browser. Start small, add features later.
 
 Built with Phaser 4 and Vite, and published on GitHub Pages.
 
-## v0.7 — Visual Polish (now)
+## v0.8 — Fresh Look (now)
 
-The same game with more feel. Still black and white.
+A slightly modern look, instead of retro black and white.
+
+- A dark slate background with a soft fade, instead of pitch black
+- The system's own clean font, with no font download
+- Pill-shaped buttons, with the highlighted one filled in blue. Pause and game over are cards over the dimmed game.
+- Rounded, glowing paddles (blue on the left, coral on the right) and a round, glowing ball
+- Big faint scores behind the play, thin subtle walls, and sparks colored by what the ball hit
+
+## v0.7 — Visual Polish (done)
+
+The same game with more feel.
 
 - A fading trail behind the ball, longer as it speeds up
 - Sparks where the ball hits a paddle or wall, more when it's faster
@@ -69,6 +79,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-10-23** — v0.8 built: a fresh, slightly modern look.
 - **2026-10-23** — The game is now just called "Pong" on screen. "Vibed" stays only in the repo name.
 - **2026-10-23** — `Esc` pauses and resumes during a game, like `P`. On the game over screen it still goes to the menu.
 - **2026-10-23** — Menus use the mouse or the keyboard (`↑`/`↓` and `Enter`) instead of number keys. Pause and game over screens have buttons too.
@@ -85,6 +96,7 @@ Like juggling a football: keep the ball going as long as you can.
 ## Decisions
 
 - v0.1–v0.4 used no framework, to keep things simple. v0.5 moved to Phaser 4 for structure and for its polish tools (particles, tweens, camera effects). It uses Vite, the setup Phaser's own starter tool uses.
+- All colors and the font live in `src/theme.js`, and the game draws its own images in `src/textures.js`, so the look can change in one place and there are still no asset files.
 - Effects only react to events from the rules and never change the game, so they can be tuned or turned off freely. They live in `src/effects.js`.
 - Ball and paddle collisions use our own code. Phaser's built-in physics only checks for overlaps once per frame, so a fast ball could pass through a thin paddle.
 - v0.1 is single-player against a wall: there's only one paddle to build, and it's a quick way to tune the ball physics before adding a second player.

@@ -3,16 +3,17 @@
 // They only change how things look, never the game itself.
 
 import { CONFIG } from './game/config.js';
+import { sparkTexture } from './textures.js';
+import { COLORS } from './theme.js';
 
-const WHITE = 0xffffff;
-
-// Which way sparks fly, in degrees (0 is right, 90 is down), away from what was hit
+// Which way sparks fly, in degrees (0 is right, 90 is down), away from what was
+// hit, and their color: the paddle's own, or a pale blue off the walls
 const SPRAY = {
-  top: { min: 30, max: 150 },
-  bottom: { min: 210, max: 330 },
-  right: { min: 120, max: 240 },
-  paddle0: { min: -60, max: 60 },
-  paddle1: { min: 120, max: 240 },
+  top: { angle: { min: 30, max: 150 }, tint: COLORS.spark },
+  bottom: { angle: { min: 210, max: 330 }, tint: COLORS.spark },
+  right: { angle: { min: 120, max: 240 }, tint: COLORS.spark },
+  paddle0: { angle: { min: -60, max: 60 }, tint: COLORS.left },
+  paddle1: { angle: { min: 120, max: 240 }, tint: COLORS.right },
 };
 
 // Players can ask their system for less motion. Screen shake is skipped for them.
@@ -24,14 +25,11 @@ export class Effects {
     this.scene = scene;
     this.paddleShapes = paddleShapes;
 
-    if (!scene.textures.exists('spark')) {
-      const g = scene.make.graphics({}, false);
-      g.fillStyle(WHITE).fillRect(0, 0, 4, 4).generateTexture('spark', 4, 4).destroy();
-    }
     this.sparks = {};
-    for (const [key, angle] of Object.entries(SPRAY)) {
-      this.sparks[key] = scene.add.particles(0, 0, 'spark', {
+    for (const [key, { angle, tint }] of Object.entries(SPRAY)) {
+      this.sparks[key] = scene.add.particles(0, 0, sparkTexture(scene), {
         angle,
+        tint,
         speed: { min: 80, max: 240 },
         lifespan: 300,
         scale: { start: 1, end: 0 },
@@ -104,8 +102,8 @@ export class Effects {
     this.trailPoints.forEach((p, i) => {
       const t = (i + 1) / (n + 1); // 0 for the oldest copy, nearly 1 for the newest
       const size = B.size * (0.4 + 0.6 * t);
-      this.trail.fillStyle(WHITE, t * 0.5);
-      this.trail.fillRect(p.x + (B.size - size) / 2, p.y + (B.size - size) / 2, size, size);
+      this.trail.fillStyle(COLORS.ball, t * 0.35);
+      this.trail.fillCircle(p.x + B.size / 2, p.y + B.size / 2, size / 2);
     });
   }
 }

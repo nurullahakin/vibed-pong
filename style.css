@@ -2,7 +2,9 @@ html, body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: #111;
+  /* A slightly darker version of the game's background fade (COLORS.bgTop to
+     COLORS.bgBottom), so the game stands out a little from the page around it */
+  background: linear-gradient(#161a28, #0b0d14);
 }
 
 /* Phaser scales the canvas to fit this */

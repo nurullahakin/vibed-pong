@@ -3,9 +3,9 @@ import { CONFIG, CONTROLS } from '../game/config.js';
 import * as rules from '../game/rules.js';
 import { Effects } from '../effects.js';
 import { playEvents } from '../sound.js';
-import { addText, addMutedLabel, bindMuteKey } from '../ui.js';
-
-const WHITE = 0xffffff;
+import { ballTexture, paddleTexture } from '../textures.js';
+import { COLORS, css } from '../theme.js';
+import { addBackground, addText, addMutedLabel, bindMuteKey } from '../ui.js';
 
 // Runs one game: reads the keys, steps the rules, then moves the shapes to match
 export class Game extends Scene {
@@ -20,43 +20,44 @@ export class Game extends Scene {
   }
 
   create() {
-    const { width, height, wall, paddle: P, ball: B } = CONFIG;
+    const { width, height, wall } = CONFIG;
     const { mode } = this;
     const onePaddle = mode === 'solo' || mode === 'aim';
     this.state = rules.createState(mode);
 
-    this.add.rectangle(0, 0, width, wall, WHITE).setOrigin(0);
-    this.add.rectangle(0, height - wall, width, wall, WHITE).setOrigin(0);
+    addBackground(this);
+    // Walls are drawn as thin bars inside the space the rules give them
+    const field = this.add.graphics().fillStyle(COLORS.line);
+    field.fillRoundedRect(12, wall / 2 - 2, width - 24, 4, 2);
+    field.fillRoundedRect(12, height - wall / 2 - 2, width - 24, 4, 2);
     if (mode === 'solo') {
-      this.add.rectangle(width - wall, 0, wall, height, WHITE).setOrigin(0);
+      field.fillRoundedRect(width - wall / 2 - 2, 12, 4, height - 24, 2);
     } else if (mode !== 'aim') {
-      for (let y = wall + 10; y < height - wall; y += 30) {
-        this.add.rectangle(width / 2 - 2, y, 4, 15, WHITE).setOrigin(0);
-      }
+      for (let y = wall + 14; y < height - wall - 10; y += 28) field.fillRoundedRect(width / 2 - 2, y, 4, 12, 2);
     }
 
     const shown = onePaddle ? this.state.paddles.slice(0, 1) : this.state.paddles;
     // Paddles are positioned by their center, so they squash evenly on a hit
-    this.paddles = shown.map(() =>
-      mode === 'aim'
-        ? this.add.image(0, 0, this.aimPaddleTexture())
-        : this.add.rectangle(0, 0, P.width, P.height, WHITE));
-    this.ball = this.add.rectangle(0, 0, B.size, B.size, WHITE).setOrigin(0);
+    const textures = mode === 'aim'
+      ? [this.aimPaddleTexture()]
+      : [paddleTexture(this, 'paddle-left', COLORS.left, COLORS.left), paddleTexture(this, 'paddle-right', COLORS.right, COLORS.right)];
+    this.paddles = shown.map((p, i) => this.add.image(0, 0, textures[i]));
+    this.ball = this.add.image(0, 0, ballTexture(this));
     this.effects = new Effects(this, this.paddles);
 
+    // Scores are big and faint, behind the play
+    const score = (x) => addText(this, x, 130, '0', 120, { weight: '800', alpha: 0.14 }).setDepth(-5);
+    const hint = (x, label) => addText(this, x, height - 44, label, 15, { color: COLORS.muted, weight: '500' });
     if (mode === 'solo') {
-      this.scoreTexts = [addText(this, width / 2, 62, '0', 48)];
-      this.bestText = addText(this, width - 30, 39, '', 18, 1);
+      this.scoreTexts = [score(width / 2)];
+      this.bestText = addText(this, width - 28, 34, '', 15, { color: COLORS.muted, originX: 1 });
     } else if (mode === 'aim') {
       this.scoreTexts = [];
       this.createAimGuide();
     } else {
-      this.scoreTexts = [addText(this, width / 4, 62, '0', 48), addText(this, (width * 3) / 4, 62, '0', 48)];
+      this.scoreTexts = [score(width / 4), score((width * 3) / 4)];
       const cpu = mode === 'cpu';
-      this.serveHints = [
-        addText(this, width / 4, height - 40, cpu ? 'W/S or ↑/↓' : 'W/S', 16),
-        addText(this, (width * 3) / 4, height - 40, cpu ? 'CPU' : '↑/↓', 16),
-      ];
+      this.serveHints = [hint(width / 4, cpu ? 'W/S or ↑/↓' : 'W/S'), hint((width * 3) / 4, cpu ? 'CPU' : '↑/↓')];
     }
 
     this.keys = this.input.keyboard.addKeys('W,S,UP,DOWN');
@@ -105,7 +106,7 @@ export class Game extends Scene {
     const s = this.state;
     const { paddle: P } = CONFIG;
     this.paddles.forEach((shape, i) => shape.setPosition(s.paddles[i].x + P.width / 2, s.paddles[i].y + P.height / 2));
-    this.ball.setPosition(s.ball.x, s.ball.y);
+    this.ball.setPosition(s.ball.x + CONFIG.ball.size / 2, s.ball.y + CONFIG.ball.size / 2);
     this.scoreTexts.forEach((text, i) => {
       if (text.text === String(s.scores[i])) return;
       text.setText(s.scores[i]);
@@ -116,7 +117,7 @@ export class Game extends Scene {
       // Best score lives in the registry so it survives between games
       const best = Math.max(this.registry.get('best') ?? 0, s.scores[0]);
       this.registry.set('best', best);
-      this.bestText.setText(`BEST ${best}`);
+      this.bestText.setText(`Best ${best}`);
     } else if (this.mode === 'aim') {
       this.syncAimGuide();
     } else {
@@ -128,30 +129,26 @@ export class Game extends Scene {
   // (steep up), white in the middle (straight), red at the bottom (steep down).
   // The angle changes evenly along the paddle, so a smooth gradient matches it.
   aimPaddleTexture() {
-    const key = 'aim-paddle';
-    if (!this.textures.exists(key)) {
-      const { width, height } = CONFIG.paddle;
-      const texture = this.textures.createCanvas(key, width, height);
-      const ctx = texture.getContext();
-      const gradient = ctx.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, '#4a8cff');
+    return paddleTexture(this, 'paddle-aim', (ctx, top, height) => {
+      const gradient = ctx.createLinearGradient(0, top, 0, top + height);
+      gradient.addColorStop(0, css(COLORS.left));
       gradient.addColorStop(0.5, '#ffffff');
-      gradient.addColorStop(1, '#ff4a4a');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
-      texture.refresh();
-    }
-    return key;
+      gradient.addColorStop(1, css(COLORS.right));
+      return gradient;
+    }, COLORS.ball);
   }
 
   // Aim practice shows where the ball hit the paddle and the path it took after
   createAimGuide() {
     const { width, height } = CONFIG;
-    this.aimText = addText(this, width / 2, 62, '', 24);
-    addText(this, width / 2, height - 40, 'Hit with different parts of your paddle · Esc to pause', 16);
+    this.aimText = addText(this, width / 2, 62, '', 22);
+    addText(this, width / 2, height - 44, 'Hit with different parts of your paddle  ·  Esc to pause', 15, {
+      color: COLORS.muted,
+      weight: '500',
+    });
     this.trail = this.add.graphics();
     this.trailPoints = [];
-    this.hitMarker = this.add.rectangle(0, 0, 6, 4, WHITE).setOrigin(0, 0.5);
+    this.hitMarker = this.add.circle(0, 0, 3, COLORS.ball).setOrigin(0, 0.5);
     this.ballId = null;
   }
 
@@ -177,7 +174,7 @@ export class Game extends Scene {
 
     this.trail.clear();
     if (this.trailPoints.length > 1) {
-      this.trail.lineStyle(2, WHITE, 0.4);
+      this.trail.lineStyle(2, COLORS.accent, 0.6);
       this.trail.strokePoints(this.trailPoints);
     }
   }
