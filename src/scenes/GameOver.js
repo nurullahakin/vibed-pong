@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 import { CONFIG } from '../game/config.js';
-import { addButton, addOverlay, bindMuteKey } from '../ui.js';
+import { addMenu, addOverlay, bindMuteKey } from '../ui.js';
 
 // Shown on top of the finished Game scene
 export class GameOver extends Scene {
@@ -26,10 +26,9 @@ export class GameOver extends Scene {
     addOverlay(this, mode === 'solo'
       ? [['GAME OVER', 48], [`Score ${left} · Best ${best}`, 22]]
       : [[left > right ? names[0] : names[1], 48], [`${left} – ${right}`, 22]]);
-    addButton(this, width / 2, height / 2 + 40, 'Play again (Space)', 22, playAgain);
-    addButton(this, width / 2, height / 2 + 95, 'Menu (Esc)', 22, toMenu);
+    // Play again starts highlighted, so Space or Enter plays again straight away
+    addMenu(this, width / 2, height / 2 + 40, 55, [['Play again', playAgain], ['Menu (Esc)', toMenu]]);
 
-    this.input.keyboard.on('keydown-SPACE', playAgain);
     this.input.keyboard.on('keydown-ESC', toMenu);
     bindMuteKey(this);
   }

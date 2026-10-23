@@ -1,6 +1,6 @@
 # How to Play Vibed Pong
 
-Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed-pong/). Click a mode on the start screen:
+Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed-pong/). Pick a mode on the start screen, by clicking or with `↑`/`↓` and `Enter`:
 
 - **Solo against the wall:** keep the ball going against a wall
 - **Two players:** play against a friend on the same keyboard
@@ -9,14 +9,17 @@ Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed
 
 ## Controls
 
+In menus, click a button, or move the highlight with `↑`/`↓` (or `W`/`S`) and press `Enter` or `Space`.
+
+In a game:
+
 | Key | What it does |
 |---|---|
 | `W` / `S` | Move the left paddle |
 | `↑` / `↓` | Move the right paddle in two-player. In solo and against the CPU, they move your paddle too. |
 | `P` | Pause and resume |
 | `M` | Sound on and off |
-| `Space` | Play again after a game ends (or click **Play again**) |
-| `Esc` | Back to the menu when paused or after a game (or click **Menu**) |
+| `Esc` | Back to the menu when paused or after a game |
 
 Your paddle starts slow and speeds up while you hold the key. Tap for a small nudge, hold to get across fast. It stops as soon as you let go.
 

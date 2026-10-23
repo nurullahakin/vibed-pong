@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 import { CONFIG } from '../game/config.js';
-import { addButton, addOverlay, bindMuteKey } from '../ui.js';
+import { addMenu, addOverlay, bindMuteKey } from '../ui.js';
 
 // Shown on top of the paused Game scene
 export class Pause extends Scene {
@@ -20,8 +20,7 @@ export class Pause extends Scene {
     };
 
     addOverlay(this, [['PAUSED', 48]]);
-    addButton(this, width / 2, height / 2 - 5, 'Resume (P)', 22, resume);
-    addButton(this, width / 2, height / 2 + 50, 'Menu (Esc)', 22, toMenu);
+    addMenu(this, width / 2, height / 2 - 5, 55, [['Resume (P)', resume], ['Menu (Esc)', toMenu]]);
 
     this.input.keyboard.on('keydown-P', resume);
     this.input.keyboard.on('keydown-ESC', toMenu);

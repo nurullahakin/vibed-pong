@@ -8,14 +8,31 @@ export function addText(scene, x, y, text, size, originX = 0.5) {
     .setOrigin(originX, 0.5);
 }
 
-// Clickable text. It brightens and grows under the mouse.
-export function addButton(scene, x, y, label, size, onClick) {
-  const button = addText(scene, x, y, label, size).setPadding(24, 10).setColor('#aaaaaa');
-  button.setInteractive({ useHandCursor: true });
-  button.on('pointerover', () => button.setColor('#ffffff').setScale(1.1));
-  button.on('pointerout', () => button.setColor('#aaaaaa').setScale(1));
-  button.on('pointerup', onClick);
-  return button;
+// A column of buttons for the mouse or the keyboard. items: [[label, onClick], ...].
+// ↑/↓ (or W/S) and hovering move the highlight. Enter, Space or a click picks.
+export function addMenu(scene, x, y, spacing, items, size = 22) {
+  let selected = 0;
+  const select = (i) => {
+    selected = (i + buttons.length) % buttons.length;
+    buttons.forEach((b, n) => b.setColor(n === selected ? '#ffffff' : '#aaaaaa').setScale(n === selected ? 1.1 : 1));
+  };
+  const buttons = items.map(([label, onClick], i) => {
+    const button = addText(scene, x, y + i * spacing, label, size).setPadding(24, 10);
+    button.setInteractive({ useHandCursor: true });
+    button.on('pointerover', () => select(i));
+    button.on('pointerup', onClick);
+    return button;
+  });
+  select(0);
+
+  // Ignore repeats from a held key. The game ends while you're often still
+  // holding a paddle key, which would otherwise slide the highlight around.
+  const onPress = (key, action) => scene.input.keyboard.on(`keydown-${key}`, (event) => {
+    if (!event.repeat) action();
+  });
+  for (const key of ['UP', 'W']) onPress(key, () => select(selected - 1));
+  for (const key of ['DOWN', 'S']) onPress(key, () => select(selected + 1));
+  for (const key of ['ENTER', 'SPACE']) onPress(key, () => items[selected][1]());
 }
 
 // Dims whatever is underneath and shows lines of [text, size] in the middle
