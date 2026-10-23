@@ -1,9 +1,13 @@
 import { Scene } from 'phaser';
 import { CONFIG } from '../game/config.js';
-import { addText, addMutedLabel, bindMuteKey } from '../ui.js';
+import { addButton, addText, addMutedLabel, bindMuteKey } from '../ui.js';
 
-// Number key for each mode
-const MODES = { ONE: 'solo', TWO: 'versus', THREE: 'cpu', FOUR: 'aim' };
+const MODES = [
+  ['Solo against the wall', 'solo'],
+  ['Two players', 'versus'],
+  ['Against the CPU', 'cpu'],
+  ['Aim practice', 'aim'],
+];
 
 export class MainMenu extends Scene {
   constructor() {
@@ -12,21 +16,13 @@ export class MainMenu extends Scene {
 
   create() {
     const { width, height } = CONFIG;
-    const lines = [
-      ['VIBED PONG', 48],
-      ['1  Solo against the wall', 22],
-      ['2  Two players', 22],
-      ['3  Against the CPU', 22],
-      ['4  Aim practice', 22],
-      ['P to pause · M to mute', 16],
-    ];
-    lines.forEach(([text, size], i) => addText(this, width / 2, height / 2 - 140 + i * 55, text, size));
+    const top = height / 2 - 140;
+    addText(this, width / 2, top, 'VIBED PONG', 48);
+    MODES.forEach(([label, mode], i) => {
+      addButton(this, width / 2, top + 75 + i * 55, label, 22, () => this.scene.start('Game', { mode }));
+    });
+    addText(this, width / 2, top + 75 + MODES.length * 55 + 10, 'Click a mode · In game, P to pause · M to mute', 16);
 
-    for (const [key, mode] of Object.entries(MODES)) {
-      const start = () => this.scene.start('Game', { mode });
-      this.input.keyboard.on(`keydown-${key}`, start);
-      this.input.keyboard.on(`keydown-NUMPAD_${key}`, start);
-    }
     bindMuteKey(this);
     addMutedLabel(this);
     this.cameras.main.fadeIn(300);

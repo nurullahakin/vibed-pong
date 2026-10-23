@@ -1,11 +1,11 @@
 # How to Play Vibed Pong
 
-Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed-pong/). Pick a mode on the start screen:
+Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed-pong/). Click a mode on the start screen:
 
-- **1 — Solo:** keep the ball going against a wall
-- **2 — Two players:** play against a friend on the same keyboard
-- **3 — Against the CPU:** play against the computer
-- **4 — Aim practice:** learn how to aim with your paddle
+- **Solo against the wall:** keep the ball going against a wall
+- **Two players:** play against a friend on the same keyboard
+- **Against the CPU:** play against the computer
+- **Aim practice:** learn how to aim with your paddle
 
 ## Controls
 
@@ -15,8 +15,8 @@ Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed
 | `↑` / `↓` | Move the right paddle in two-player. In solo and against the CPU, they move your paddle too. |
 | `P` | Pause and resume |
 | `M` | Sound on and off |
-| `Space` | Play again after a game ends |
-| `Esc` | Back to the menu (when paused or after a game) |
+| `Space` | Play again after a game ends (or click **Play again**) |
+| `Esc` | Back to the menu when paused or after a game (or click **Menu**) |
 
 Your paddle starts slow and speeds up while you hold the key. Tap for a small nudge, hold to get across fast. It stops as soon as you let go.
 
@@ -43,7 +43,7 @@ Only that spot matters:
 
 Steep shots bounce off the top and bottom walls and are harder to reach, especially for the CPU.
 
-To try it out, pick **Aim practice** on the start screen. See [Aim Practice](#aim-practice) below.
+To try it out, click **Aim practice** on the start screen. See [Aim Practice](#aim-practice) below.
 
 ## How the Ball Moves
 
@@ -83,4 +83,4 @@ Move your paddle so the ball hits a different part of it, and see what happens. 
 
 Try hitting all three balls with the same part of the paddle. They all go back the same way, whatever direction they came from.
 
-There's no score and no game over. If you miss, the next ball comes. Press `P`, then `Esc` to go back to the menu.
+There's no score and no game over. If you miss, the next ball comes. Press `P`, then click **Menu** to go back.

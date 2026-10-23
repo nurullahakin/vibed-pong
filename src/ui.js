@@ -8,6 +8,16 @@ export function addText(scene, x, y, text, size, originX = 0.5) {
     .setOrigin(originX, 0.5);
 }
 
+// Clickable text. It brightens and grows under the mouse.
+export function addButton(scene, x, y, label, size, onClick) {
+  const button = addText(scene, x, y, label, size).setPadding(24, 10).setColor('#aaaaaa');
+  button.setInteractive({ useHandCursor: true });
+  button.on('pointerover', () => button.setColor('#ffffff').setScale(1.1));
+  button.on('pointerout', () => button.setColor('#aaaaaa').setScale(1));
+  button.on('pointerup', onClick);
+  return button;
+}
+
 // Dims whatever is underneath and shows lines of [text, size] in the middle
 export function addOverlay(scene, lines) {
   const { width, height } = CONFIG;

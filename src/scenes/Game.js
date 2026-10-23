@@ -145,7 +145,7 @@ export class Game extends Scene {
   createAimGuide() {
     const { width, height } = CONFIG;
     this.aimText = addText(this, width / 2, 62, '', 24);
-    addText(this, width / 2, height - 40, 'Hit with different parts of your paddle · P, then Esc for menu', 16);
+    addText(this, width / 2, height - 40, 'Hit with different parts of your paddle · P to pause', 16);
     this.trail = this.add.graphics();
     this.trailPoints = [];
     this.hitMarker = this.add.rectangle(0, 0, 6, 4, WHITE).setOrigin(0, 0.5);
