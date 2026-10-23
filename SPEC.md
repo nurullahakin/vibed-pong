@@ -69,7 +69,8 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
-- **2026-10-23** — Menus use the mouse or the keyboard (`↑`/`↓` and `Enter`) instead of number keys. Pause and game over screens have buttons too, and keep `P` and `Esc` as shortcuts.
+- **2026-10-23** — `Esc` pauses and resumes during a game, like `P`. On the game over screen it still goes to the menu.
+- **2026-10-23** — Menus use the mouse or the keyboard (`↑`/`↓` and `Enter`) instead of number keys. Pause and game over screens have buttons too.
 - **2026-10-22** — v0.7 built.
 - **2026-10-22** — Paddles now start slow and speed up while a key is held, for finer control. Made the CPU easier to keep the balance.
 - **2026-10-22** — v0.6 built. Also fixed the hit spot on the paddle: it was measured up to a frame late, so angled and fast balls bounced slightly off from where they hit.

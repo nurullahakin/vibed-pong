@@ -20,10 +20,11 @@ export class Pause extends Scene {
     };
 
     addOverlay(this, [['PAUSED', 48]]);
-    addMenu(this, width / 2, height / 2 - 5, 55, [['Resume (P)', resume], ['Menu (Esc)', toMenu]]);
+    addMenu(this, width / 2, height / 2 - 5, 55, [['Resume (Esc)', resume], ['Menu', toMenu]]);
 
+    // P and Esc both resume, the same keys that paused
     this.input.keyboard.on('keydown-P', resume);
-    this.input.keyboard.on('keydown-ESC', toMenu);
+    this.input.keyboard.on('keydown-ESC', resume);
     bindMuteKey(this);
   }
 }

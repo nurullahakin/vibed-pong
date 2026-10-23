@@ -17,9 +17,8 @@ In a game:
 |---|---|
 | `W` / `S` | Move the left paddle |
 | `↑` / `↓` | Move the right paddle in two-player. In solo and against the CPU, they move your paddle too. |
-| `P` | Pause and resume |
+| `Esc` or `P` | Pause and resume |
 | `M` | Sound on and off |
-| `Esc` | Back to the menu when paused or after a game |
 
 Your paddle starts slow and speeds up while you hold the key. Tap for a small nudge, hold to get across fast. It stops as soon as you let go.
 
@@ -86,4 +85,4 @@ Move your paddle so the ball hits a different part of it, and see what happens. 
 
 Try hitting all three balls with the same part of the paddle. They all go back the same way, whatever direction they came from.
 
-There's no score and no game over. If you miss, the next ball comes. Press `P`, then click **Menu** to go back.
+There's no score and no game over. If you miss, the next ball comes. Press `Esc`, then pick **Menu** to go back.

@@ -60,12 +60,15 @@ export class Game extends Scene {
     }
 
     this.keys = this.input.keyboard.addKeys('W,S,UP,DOWN');
-    this.input.keyboard.on('keydown-P', () => {
+    // P and Esc both pause
+    const pause = () => {
       if (this.ending) return;
       this.cameras.main.resetFX(); // don't freeze mid-shake
       this.scene.pause();
       this.scene.launch('Pause');
-    });
+    };
+    this.input.keyboard.on('keydown-P', pause);
+    this.input.keyboard.on('keydown-ESC', pause);
     bindMuteKey(this);
     addMutedLabel(this);
     this.sync();
@@ -145,7 +148,7 @@ export class Game extends Scene {
   createAimGuide() {
     const { width, height } = CONFIG;
     this.aimText = addText(this, width / 2, 62, '', 24);
-    addText(this, width / 2, height - 40, 'Hit with different parts of your paddle · P to pause', 16);
+    addText(this, width / 2, height - 40, 'Hit with different parts of your paddle · Esc to pause', 16);
     this.trail = this.add.graphics();
     this.trailPoints = [];
     this.hitMarker = this.add.rectangle(0, 0, 6, 4, WHITE).setOrigin(0, 0.5);
