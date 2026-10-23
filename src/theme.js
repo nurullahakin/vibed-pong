@@ -16,6 +16,7 @@ export const COLORS = {
   right: 0xff7a90, // right paddle
   ball: 0xffffff,
   spark: 0xc9d4ff, // sparks off the walls
+  warn: 0xffb86b, // low frame rate or high ping
 };
 
 export const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';

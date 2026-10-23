@@ -6,6 +6,7 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || (import.meta.env.DEV ? 'ws
 // Your chosen player name is remembered in this browser. Storage can be blocked,
 // for example in private windows, so it's just skipped then.
 const NAME_KEY = 'pong.playerName';
+const PING_EVERY = 2000; // milliseconds between pings
 const storage = {
   get: () => { try { return localStorage.getItem(NAME_KEY); } catch { return null; } },
   set: (name) => { try { localStorage.setItem(NAME_KEY, name); } catch {} },
@@ -17,6 +18,7 @@ class Connection {
     this.handlers = new Map(); // message type -> Set of functions
     this.last = {}; // the latest message of each type, e.g. last.room
     this.name = null; // the name the server gave us, like "Player 3"
+    this.ping = null; // the last round trip to the server in milliseconds, or null
   }
 
   get open() {
@@ -30,9 +32,14 @@ class Connection {
     return new Promise((resolve, reject) => {
       const socket = new WebSocket(SERVER_URL);
       this.socket = socket;
-      socket.onopen = () => resolve();
+      socket.onopen = () => {
+        this.startPinging(socket);
+        resolve();
+      };
       socket.onerror = () => reject(new Error("Can't reach the server"));
       socket.onclose = () => {
+        clearInterval(socket.pingTimer);
+        this.ping = null;
         if (this.socket !== socket) return; // closed on purpose
         this.socket = null;
         this.emit({ type: 'disconnected' });
@@ -44,12 +51,20 @@ class Connection {
         } catch {
           return;
         }
+        if (message.type === 'pong') this.ping = Math.round(performance.now() - message.time);
         if (message.type === 'welcome' || message.type === 'name') this.name = message.name;
         // Ask for the name chosen last time, instead of the "Player 3" the server gives
         if (message.type === 'welcome' && storage.get()) this.send({ type: 'name', name: storage.get() });
         this.emit(message);
       };
     });
+  }
+
+  // Times a round trip to the server every few seconds, for the ping indicator
+  startPinging(socket) {
+    const ping = () => this.send({ type: 'ping', time: performance.now() });
+    ping();
+    socket.pingTimer = setInterval(ping, PING_EVERY);
   }
 
   close() {

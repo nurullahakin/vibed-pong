@@ -5,6 +5,7 @@ import { MainMenu } from './scenes/MainMenu.js';
 import { Game } from './scenes/Game.js';
 import { Pause } from './scenes/Pause.js';
 import { GameOver } from './scenes/GameOver.js';
+import { Stats } from './scenes/Stats.js';
 import { Lobby } from './scenes/Lobby.js';
 import { NameCard } from './scenes/NameCard.js';
 import { OnlineRoom } from './scenes/OnlineRoom.js';
@@ -22,5 +23,5 @@ new Phaser.Game({
   // Lets scenes place HTML elements over the game, like the room name box
   dom: { createContainer: true },
   // The first scene starts automatically. Later ones draw on top of earlier ones.
-  scene: [MainMenu, Lobby, OnlineRoom, NameCard, Game, Pause, GameOver],
+  scene: [MainMenu, Lobby, OnlineRoom, NameCard, Game, Pause, GameOver, Stats],
 });

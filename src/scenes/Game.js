@@ -55,7 +55,7 @@ export class Game extends Scene {
     const hint = (x, label) => addText(this, x, height - 44, label, 15, { color: COLORS.muted, weight: '500' });
     if (mode === 'solo') {
       this.scoreTexts = [score(width / 2)];
-      this.bestText = addText(this, width - 28, 34, '', 15, { color: COLORS.muted, originX: 1 });
+      this.bestText = addText(this, width - 20, 46, '', 15, { color: COLORS.muted, originX: 1 });
     } else if (mode === 'aim') {
       this.scoreTexts = [];
       this.createAimGuide();

@@ -23,6 +23,8 @@ In a game:
 
 Your paddle starts slow and speeds up while you hold the key. Tap for a small nudge, hold to get across fast. It stops as soon as you let go.
 
+The top-right corner shows how smoothly the game runs, in frames per second (60 is ideal), and your ping to the server while you're online. Either one turns orange when it's poor.
+
 If your device is set to reduce motion, the screen won't shake when someone misses.
 
 ## Aiming

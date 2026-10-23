@@ -123,6 +123,10 @@ wss.on('connection', (socket) => {
       case 'input':
         player.room?.input(player, message.dir);
         break;
+      case 'ping':
+        // Sent straight back, so the player can time the round trip
+        if (Number.isFinite(message.time)) player.send({ type: 'pong', time: message.time });
+        break;
     }
   });
 
