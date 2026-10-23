@@ -2,9 +2,16 @@
 
 A 2D Pong game in the browser. Start small, add features later.
 
-Built with Phaser 4 and Vite, and published on GitHub Pages.
+Built with Phaser 4 and Vite, and published on GitHub Pages. Online play runs on a small Node server.
 
-## v0.8 — Fresh Look (now)
+## v0.9 — Online Multiplayer (now)
+
+- **Online** on the start screen opens the lobby: a table of rooms with friendly names (like "Swift Comet"), who's in each one and whether it's open, full or playing, plus how many players are online. Join an open room, or create your own.
+- In a room, both players press **Ready**. After a 3-second countdown, the match starts: normal two-player rules, first to 11.
+- Each player uses `W`/`S` or `↑`/`↓` for their own paddle. `Esc` opens a menu, but the match keeps going.
+- After a match, both go back to the room to ready up again. If someone leaves, the other is told and goes back to the room.
+
+## v0.8 — Fresh Look (done)
 
 A slightly modern look, instead of retro black and white.
 
@@ -75,10 +82,16 @@ Like juggling a football: keep the ball going as long as you can.
 ## Later
 
 1. Power-ups
-2. Online multiplayer
+2. Smoother online play: move your own paddle right away instead of waiting for the server
 
 ## Progress
 
+- **2026-10-23** — Buttons no longer say "(Esc)". Esc still works everywhere it did.
+- **2026-10-23** — The room name and your own name can also be changed from inside a room.
+- **2026-10-23** — Players can pick their own name in the lobby. It's remembered in the browser.
+- **2026-10-23** — Rooms can be named. Create room asks for a name, starting with a random suggestion.
+- **2026-10-23** — The lobby is now a table of named rooms, with their players, their status and how many players are online.
+- **2026-10-23** — v0.9 built. Tested locally with two browsers; the server isn't deployed yet.
 - **2026-10-23** — v0.8 built: a fresh, slightly modern look.
 - **2026-10-23** — The game is now just called "Pong" on screen. "Vibed" stays only in the repo name.
 - **2026-10-23** — `Esc` pauses and resumes during a game, like `P`. On the game over screen it still goes to the menu.
@@ -96,6 +109,12 @@ Like juggling a football: keep the ball going as long as you can.
 ## Decisions
 
 - v0.1–v0.4 used no framework, to keep things simple. v0.5 moved to Phaser 4 for structure and for its polish tools (particles, tweens, camera effects). It uses Vite, the setup Phaser's own starter tool uses.
+- Online play uses a plain Node server with the `ws` package. The server runs the same rules as local play and is the only one that decides what happens. Players only send which way they're pressing, and get the game state 60 times a second.
+- The room name box is a real HTML input over the game, not text drawn by Phaser, so typing, the cursor, copy and paste and every language's letters work. While it has focus, the game's own keys are switched off, and so is Phaser's blocking of `W`, `S` and the arrows, which otherwise lasts after any game.
+- Your player name is remembered in the browser's local storage and sent again on every connect. If storage is blocked, as in some private windows, you just start as "Player N" again.
+- Either player in a room can rename it, since a room is just two friends with no host. Renaming is blocked mid-match.
+- Room and player names are cleaned on the server: trimmed, invisible characters removed, and cut to 24 characters for rooms or 16 for players. An empty room name gets a random one; an empty player name is ignored.
+- Online has no prediction yet, so your own paddle lags by your round trip to the server. Fine on a good connection, and simple to start with.
 - All colors and the font live in `src/theme.js`, and the game draws its own images in `src/textures.js`, so the look can change in one place and there are still no asset files.
 - Effects only react to events from the rules and never change the game, so they can be tuned or turned off freely. They live in `src/effects.js`.
 - Ball and paddle collisions use our own code. Phaser's built-in physics only checks for overlaps once per frame, so a fast ball could pass through a thin paddle.

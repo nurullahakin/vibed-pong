@@ -5,6 +5,7 @@ Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed
 - **Solo against the wall:** keep the ball going against a wall
 - **Two players:** play against a friend on the same keyboard
 - **Against the CPU:** play against the computer
+- **Online:** play against someone on another computer
 - **Aim practice:** learn how to aim with your paddle
 
 ## Controls
@@ -70,6 +71,18 @@ After each point, the ball waits a second at the center, then serves toward the 
 Same rules as two players: you're on the left, the computer is on the right, and first to 11 wins.
 
 The CPU is good but not perfect. Its paddle never gets as fast as yours, and it reacts a moment late. It can't predict bounces, so steep shots off your paddle's edge are your best weapon (see [Aiming](#aiming)). It also doesn't always hit with the middle of its paddle, so watch for odd angles coming back.
+
+## Online
+
+Pick **Online** to open the lobby. It lists every room by name, like **Swift Comet**, with who's in it and whether it's **Open**, **Full** or **Playing**, and shows how many players are online. Click an open room to join it, or pick **Create room**. You get a random name to start with: keep it, type your own (up to 24 characters), or press ⟳ for another random one. Then tell a friend your room's name so they can find it.
+
+You start out as something like **Player 3**. Pick **Your name** to choose your own (up to 16 characters). Everyone in the lobby and your room sees it, and this browser remembers it for next time.
+
+Inside a room, **Room name** and **Your name** let either of you rename the room or yourself while you wait.
+
+In the room, both of you press **Ready**. After a short countdown the match starts, with the same rules as two players: first to 11. You control your own paddle with `W`/`S` or `↑`/`↓`, whichever side you're on.
+
+The match can't be paused. `Esc` opens a menu where you can leave, but play goes on while it's open. After a match, you both go back to the room for a rematch.
 
 ## Aim Practice
 

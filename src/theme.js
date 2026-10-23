@@ -6,6 +6,7 @@ export const COLORS = {
   bgBottom: 0x11141e, // ...to this at the bottom
   panel: 0x232a3d, // cards and buttons
   panelBorder: 0x3a4360,
+  panelHover: 0x2c344b, // a highlighted table row
   line: 0x323a54, // walls and the center line
   text: 0xe9ecf5,
   muted: 0x8a93ad,
@@ -20,3 +21,10 @@ export const COLORS = {
 export const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
 export const css = (color) => `#${color.toString(16).padStart(6, '0')}`;
+
+// Makes the colors and font available to style.css too, as var(--accent) and so on
+export function shareWithCss() {
+  const root = document.documentElement.style;
+  for (const [name, color] of Object.entries(COLORS)) root.setProperty(`--${name}`, css(color));
+  root.setProperty('--font', FONT);
+}

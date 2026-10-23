@@ -2,12 +2,14 @@ import { Scene } from 'phaser';
 import { CONFIG, CONTROLS } from '../game/config.js';
 import * as rules from '../game/rules.js';
 import { Effects } from '../effects.js';
+import { net } from '../net.js';
 import { playEvents } from '../sound.js';
 import { ballTexture, paddleTexture } from '../textures.js';
 import { COLORS, css } from '../theme.js';
 import { addBackground, addText, addMutedLabel, bindMuteKey } from '../ui.js';
 
-// Runs one game: reads the keys, steps the rules, then moves the shapes to match
+// Runs one game: reads the keys, steps the rules, then moves the shapes to match.
+// Online, the server steps the rules instead, and this scene draws what it sends.
 export class Game extends Scene {
   constructor() {
     super('Game');
@@ -15,6 +17,8 @@ export class Game extends Scene {
 
   init(data) {
     this.mode = data.mode;
+    this.online = data.mode === 'online';
+    this.seat = data.seat ?? 0; // online: 0 plays left, 1 plays right
     // Phaser reuses the scene object when a game restarts, so reset per-game flags
     this.ending = false;
   }
@@ -23,7 +27,8 @@ export class Game extends Scene {
     const { width, height, wall } = CONFIG;
     const { mode } = this;
     const onePaddle = mode === 'solo' || mode === 'aim';
-    this.state = rules.createState(mode);
+    // Online starts from the same layout as a two-player game until the server's first update
+    this.state = rules.createState(this.online ? 'versus' : mode);
 
     addBackground(this);
     // Walls are drawn as thin bars inside the space the rules give them
@@ -56,24 +61,60 @@ export class Game extends Scene {
       this.createAimGuide();
     } else {
       this.scoreTexts = [score(width / 4), score((width * 3) / 4)];
-      const cpu = mode === 'cpu';
-      this.serveHints = [hint(width / 4, cpu ? 'W/S or ↑/↓' : 'W/S'), hint((width * 3) / 4, cpu ? 'CPU' : '↑/↓')];
+      const labels = {
+        versus: ['W/S', '↑/↓'],
+        cpu: ['W/S or ↑/↓', 'CPU'],
+        online: this.seat === 0 ? ['You: W/S or ↑/↓', 'Them'] : ['Them', 'You: W/S or ↑/↓'],
+      }[mode];
+      this.serveHints = labels.map((label, i) => hint((width * (1 + 2 * i)) / 4, label));
     }
 
     this.keys = this.input.keyboard.addKeys('W,S,UP,DOWN');
-    // P and Esc both pause
+    // P and Esc both pause. Online, the match can't stop, so the pause screen
+    // just sits on top while play goes on.
     const pause = () => {
-      if (this.ending) return;
-      this.cameras.main.resetFX(); // don't freeze mid-shake
-      this.scene.pause();
-      this.scene.launch('Pause');
+      if (this.ending || this.scene.isActive('Pause')) return;
+      if (!this.online) {
+        this.cameras.main.resetFX(); // don't freeze mid-shake
+        this.scene.pause();
+      }
+      this.scene.launch('Pause', { online: this.online });
     };
     this.input.keyboard.on('keydown-P', pause);
     this.input.keyboard.on('keydown-ESC', pause);
     bindMuteKey(this);
     addMutedLabel(this);
+    if (this.online) this.listenToServer();
     this.sync();
     this.cameras.main.fadeIn(250);
+  }
+
+  listenToServer() {
+    this.lastDir = 0;
+    this.serverEvents = [];
+    net.listen(this, 'state', (message) => {
+      this.state = message.state;
+      this.serverEvents.push(...message.events);
+    });
+    net.listen(this, 'over', (message) => {
+      this.ending = true;
+      this.time.delayedCall(500, () => {
+        this.scene.stop('Pause');
+        this.scene.pause();
+        this.scene.launch('GameOver', { mode: 'online', seat: this.seat, scores: message.scores });
+      });
+    });
+    // The other player left: back to the room, which says so
+    net.listen(this, 'room', (message) => {
+      if (message.room.players.length < 2) this.backTo('OnlineRoom');
+    });
+    net.listen(this, 'disconnected', () => this.backTo('Lobby'));
+  }
+
+  backTo(sceneKey) {
+    this.scene.stop('Pause');
+    this.scene.stop('GameOver');
+    this.scene.start(sceneKey);
   }
 
   update(time, delta) {
@@ -81,6 +122,17 @@ export class Game extends Scene {
     const dt = Math.min(delta / 1000, 1 / 30);
     const held = (names) => names.some((k) => this.keys[k].isDown);
     const dirs = CONTROLS[this.mode].map(({ up, down }) => (held(down) ? 1 : 0) - (held(up) ? 1 : 0));
+
+    if (this.online) {
+      // Only tell the server when the direction changes
+      if (dirs[0] !== this.lastDir) net.send({ type: 'input', dir: dirs[0] });
+      this.lastDir = dirs[0];
+      const events = this.serverEvents.splice(0);
+      playEvents(this.sound, events);
+      this.effects.play(events, this.state);
+      this.sync();
+      return;
+    }
 
     const events = rules.update(this.state, dirs, dt);
     playEvents(this.sound, events);

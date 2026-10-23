@@ -44,6 +44,7 @@ export const CONTROLS = {
   solo: [EITHER_KEYS],
   cpu: [EITHER_KEYS],
   aim: [EITHER_KEYS],
+  online: [EITHER_KEYS], // your own paddle, whichever side you're on
   versus: [
     { up: ['W'], down: ['S'] },
     { up: ['UP'], down: ['DOWN'] },

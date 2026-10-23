@@ -28,6 +28,10 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # The online server address, e.g. wss://pong-server.onrender.com. Set it under
+          # Settings → Secrets and variables → Actions → Variables. Empty means online is off.
+          VITE_SERVER_URL: ${{ vars.SERVER_URL }}
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

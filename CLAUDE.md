@@ -13,7 +13,7 @@ Read [SPEC.md](SPEC.md) first. It sets the scope.
 - After finishing work, add a line at the top of Progress in SPEC.md (newest first), and one to Decisions if you made a non-obvious choice.
 - If gameplay or controls change, update [HOW-TO-PLAY.md](HOW-TO-PLAY.md). It's for players, so keep it free of code terms.
 - No dependencies without asking.
-- Keep the game rules in `src/game/` free of Phaser, so a multiplayer server can reuse them. Scenes handle drawing, input and sound.
+- Keep the game rules in `src/game/` free of Phaser, so the online server in `server/` can run them. Scenes handle drawing, input and sound.
 - Take colors and the font from `src/theme.js` instead of writing new ones in place.
 - The repo is public. Never commit local paths or personal info.
 - Keep the docs short. They're for people too.

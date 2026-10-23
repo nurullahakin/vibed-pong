@@ -22,16 +22,28 @@ npm install
 npm run dev     # play locally, reloads as you edit
 npm test        # check the game rules
 npm run build   # build the site into dist/
+npm run server  # run the online server locally, for online play with npm run dev
 ```
 
 Every push to `main` is tested, built and published to GitHub Pages.
+
+### Online Server
+
+Online play needs [server/](server/) running somewhere that keeps WebSocket connections open. GitHub Pages can't do that. Any Node host works. For example, on [Render](https://render.com):
+
+1. Create a **Web Service** from this repo, with build command `npm ci` and start command `npm start`.
+2. In this repo's **Settings → Secrets and variables → Actions → Variables**, add `SERVER_URL` set to the service's address with `wss://`, for example `wss://pong-server.onrender.com`.
+3. Push, or rerun the Deploy workflow. The site now connects to that server.
+
+Render's free plan sleeps after 15 idle minutes, so the first player after a break may wait about a minute to connect.
 
 ## Project
 
 | Where | What's in it |
 |---|---|
 | [src/game/](src/game/) | Game rules and tuning values, in plain JavaScript with no Phaser |
-| [src/scenes/](src/scenes/) | Phaser scenes: menu, game, pause, game over |
+| [src/scenes/](src/scenes/) | Phaser scenes: menu, game, pause, game over, online rooms |
+| [server/](server/) | The online server: room list and online matches |
 | [SPEC.md](SPEC.md) | Scope, roadmap, progress and decisions |
 | [HOW-TO-PLAY.md](HOW-TO-PLAY.md) | Player guide |
 | [CLAUDE.md](CLAUDE.md) | Instructions for the AI, including the prompt that started the project |
