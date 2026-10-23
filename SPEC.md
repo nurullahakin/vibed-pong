@@ -69,6 +69,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-10-23** — The game is now just called "Pong" on screen. "Vibed" stays only in the repo name.
 - **2026-10-23** — `Esc` pauses and resumes during a game, like `P`. On the game over screen it still goes to the menu.
 - **2026-10-23** — Menus use the mouse or the keyboard (`↑`/`↓` and `Enter`) instead of number keys. Pause and game over screens have buttons too.
 - **2026-10-22** — v0.7 built.

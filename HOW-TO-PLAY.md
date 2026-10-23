@@ -1,4 +1,4 @@
-# How to Play Vibed Pong
+# How to Play
 
 Play at [nurullahakin.github.io/vibed-pong](https://nurullahakin.github.io/vibed-pong/). Pick a mode on the start screen, by clicking or with `↑`/`↓` and `Enter`:
 
