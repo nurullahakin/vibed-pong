@@ -86,6 +86,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-11-03** — Two players get a setup screen too: play on the left and right, or the top and bottom.
 - **2026-11-03** — Each side has its own paddle color: blue left, coral right, mint top, violet bottom.
 - **2026-11-03** — Solo can be played on the top or bottom too, with the paddle lying flat.
 - **2026-11-03** — Solo has a setup screen before the game. The first option is which side you play on.
@@ -116,7 +117,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 - v0.1–v0.4 used no framework, to keep things simple. v0.5 moved to Phaser 4 for structure and for its polish tools (particles, tweens, camera effects). It uses Vite, the setup Phaser's own starter tool uses.
 - Solo on any side uses one set of rules: they always put you on the left of their own field, and a view (`src/view.js`) mirrors or turns that field onto the screen. For the top or bottom, the field is turned, so it's 600 long and 800 wide. The physics stay in one place, and Left/Right/Top/Bottom all get them unchanged.
-- Solo options live on their own screen, so more can be added later without crowding the main menu. Small choices like your side and your player name are remembered in the browser (`src/prefs.js`).
+- Solo and two players share one setup screen (`src/scenes/Setup.js`), each with its own options, so more can be added later without crowding the main menu. Two players can only pick opposite pairs of sides, since the ball has to travel between them. Small choices like your side and your player name are remembered in the browser (`src/prefs.js`).
 - Online play uses a plain Node server with the `ws` package. The server runs the same rules as local play and is the only one that decides what happens. Players only send which way they're pressing, and get the game state 60 times a second.
 - The room name box is a real HTML input over the game, not text drawn by Phaser, so typing, the cursor, copy and paste and every language's letters work. While it has focus, the game's own keys are switched off, and so is Phaser's blocking of `W`, `S` and the arrows, which otherwise lasts after any game.
 - Your player name is remembered in the browser's local storage and sent again on every connect. If storage is blocked, as in some private windows, you just start as "Player N" again.

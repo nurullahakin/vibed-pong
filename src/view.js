@@ -14,6 +14,15 @@ const TURNS = {
 
 export const SIDES = Object.keys(TURNS);
 
+// The view for a game's mode and options. Solo can be on any side
+// ({ side: 'top' }); two players can be left and right, or top and bottom
+// ({ sides: 'topBottom' }). Everything else is shown as it is.
+export function viewFor(mode, options = {}) {
+  if (mode === 'solo') return makeView(options.side ?? 'left');
+  if (mode === 'versus' && options.sides === 'topBottom') return makeView('top');
+  return makeView('left');
+}
+
 export function makeView(side = 'left') {
   const turn = TURNS[side] ?? TURNS.left;
   const [xx, yx] = turn.x; // screen x and y for one step along the field's x

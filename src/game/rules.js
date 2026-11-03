@@ -3,7 +3,7 @@
 //
 // The rules always play on their own field, with the ball travelling along x
 // and paddles moving along y. In solo you're always on the left of that field;
-// the scene turns it to put you on whichever side of the screen you chose.
+// the scene turns it to put you, or both players, on the sides that were chosen.
 
 import { CONFIG } from './config.js';
 import { moveCpu } from './cpu.js';
@@ -11,12 +11,11 @@ import { moveCpu } from './cpu.js';
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
 // mode: 'solo' | 'versus' | 'cpu' | 'aim'
-// options.side: in solo, the side of the screen you play on: 'left' (the default),
-// 'right', 'top' or 'bottom'. For top and bottom the field is turned on its side,
-// so it's as long as the screen is tall, and as tall as the screen is wide.
+// options.sideways: the field is turned on its side, for playing on the top and
+// bottom of the screen. It's then as long as the screen is tall, and as tall as
+// the screen is wide.
 export function createState(mode, options = {}) {
-  const sideways = mode === 'solo' && (options.side === 'top' || options.side === 'bottom');
-  const field = sideways
+  const field = options.sideways
     ? { width: CONFIG.height, height: CONFIG.width }
     : { width: CONFIG.width, height: CONFIG.height };
   const { paddle } = CONFIG;

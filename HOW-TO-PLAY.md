@@ -18,7 +18,7 @@ In a game:
 |---|---|
 | `W` / `S` | Move the left paddle |
 | `↑` / `↓` | Move the right paddle in two-player. In solo and against the CPU, they move your paddle too. |
-| `A` / `D` or `←` / `→` | Move your paddle in solo on the top or bottom |
+| `A` / `D` or `←` / `→` | Move your paddle in solo on the top or bottom. In two-player on the top and bottom, `A`/`D` moves the top paddle and `←`/`→` the bottom one. |
 | `Esc` or `P` | Pause and resume |
 | `M` | Sound on and off |
 
@@ -67,7 +67,9 @@ Your best score is shown in the top right. It's kept until you close or reload t
 
 ## Two Players
 
-The left player uses `W`/`S` and the right player uses `↑`/`↓`. If the ball gets past your paddle, your opponent scores. **First to 11 wins.**
+Before the game starts, pick where you play: **Left & Right**, or **Top & Bottom**. Your choice is remembered for next time.
+
+On the left and right, the left player uses `W`/`S` and the right player uses `↑`/`↓`. On the top and bottom, the top player uses `A`/`D` and the bottom player uses `←`/`→`. If the ball gets past your paddle, your opponent scores. **First to 11 wins.**
 
 After each point, the ball waits a second at the center, then serves toward the player who just lost the point.
 

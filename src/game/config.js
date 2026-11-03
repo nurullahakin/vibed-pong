@@ -47,6 +47,11 @@ export const CONTROLS = {
   online: [EITHER_KEYS], // your own paddle, whichever side you're on
   // Solo on the top or bottom: the paddle lies flat and moves left and right
   soloSideways: [{ up: ['A', 'LEFT'], down: ['D', 'RIGHT'] }],
+  // Two players on the top and bottom: the top one uses A/D, the bottom one ←/→
+  versusSideways: [
+    { up: ['A'], down: ['D'] },
+    { up: ['LEFT'], down: ['RIGHT'] },
+  ],
   versus: [
     { up: ['W'], down: ['S'] },
     { up: ['UP'], down: ['DOWN'] },

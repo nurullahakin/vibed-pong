@@ -7,7 +7,7 @@ import { playEvents } from '../sound.js';
 import { ballTexture, paddleTexture } from '../textures.js';
 import { COLORS, SIDE_COLORS, css } from '../theme.js';
 import { addBackground, addText, addMutedLabel, bindMuteKey } from '../ui.js';
-import { makeView } from '../view.js';
+import { viewFor } from '../view.js';
 
 // Runs one game: reads the keys, steps the rules, then moves the shapes to match.
 // Online, the server steps the rules instead, and this scene draws what it sends.
@@ -18,7 +18,7 @@ export class Game extends Scene {
 
   init(data) {
     this.mode = data.mode;
-    this.options = data.options ?? {}; // e.g. { side: 'top' } for solo
+    this.options = data.options ?? {}; // e.g. { side: 'top' } for solo, { sides: 'topBottom' } for two players
     this.online = data.mode === 'online';
     this.seat = data.seat ?? 0; // online: 0 plays left, 1 plays right
     // Phaser reuses the scene object when a game restarts, so reset per-game flags
@@ -28,11 +28,12 @@ export class Game extends Scene {
   create() {
     const { width, height, wall } = CONFIG;
     const { mode } = this;
+    // The view turns the rules' field to put the players on the chosen sides:
+    // solo on any side, two players on the left and right or the top and bottom
+    this.view = viewFor(mode, this.options);
+    const { side, sideways } = this.view;
     // Online starts from the same layout as a two-player game until the server's first update
-    this.state = rules.createState(this.online ? 'versus' : mode, this.options);
-    // In solo you can play on any side: the view turns the rules' field to put you there
-    const side = mode === 'solo' ? this.options.side ?? 'left' : 'left';
-    this.view = makeView(side);
+    this.state = rules.createState(this.online ? 'versus' : mode, { sideways });
 
     addBackground(this);
     // Walls are thin bars inside the space the rules give them, drawn on the
@@ -54,12 +55,11 @@ export class Game extends Scene {
 
     // Which of the rules' two paddles are drawn: just yours in solo and aim practice
     this.paddleIndexes = mode === 'aim' || mode === 'solo' ? [0] : [0, 1];
-    // Every side has its own paddle color, and in solo yours is your side's
+    // Every side has its own paddle color: in solo yours is your side's, and two
+    // players on the top and bottom get those two
     const sideTexture = (name) => paddleTexture(this, `paddle-${name}`, SIDE_COLORS[name], SIDE_COLORS[name]);
-    const paddleColor = SIDE_COLORS[side];
-    const textures = mode === 'aim'
-      ? [this.aimPaddleTexture()]
-      : mode === 'solo' ? [sideTexture(side)] : [sideTexture('left'), sideTexture('right')];
+    const paddleSides = mode === 'solo' ? [side] : sideways ? ['top', 'bottom'] : ['left', 'right'];
+    const textures = mode === 'aim' ? [this.aimPaddleTexture()] : paddleSides.map(sideTexture);
     // Paddles are positioned by their center, so they squash evenly on a hit.
     // On the top or bottom they're turned to lie flat.
     this.paddles = this.paddleIndexes.map((index, n) => this.add.image(0, 0, textures[n]).setAngle(this.view.sideways ? 90 : 0));
@@ -67,11 +67,11 @@ export class Game extends Scene {
     // Effects look paddles up by the rules' paddle number
     const byIndex = [];
     this.paddleIndexes.forEach((index, n) => { byIndex[index] = this.paddles[n]; });
-    this.effects = new Effects(this, byIndex, this.view, paddleColor);
+    this.effects = new Effects(this, byIndex, this.view, paddleSides.map((name) => SIDE_COLORS[name]));
 
     // Scores are big and faint, behind the play
-    const score = (x) => addText(this, x, 130, '0', 120, { weight: '800', alpha: 0.14 }).setDepth(-5);
-    const hint = (x, label) => addText(this, x, height - 44, label, 15, { color: COLORS.muted, weight: '500' });
+    const score = (x, y = 130) => addText(this, x, y, '0', 120, { weight: '800', alpha: 0.14 }).setDepth(-5);
+    const hint = (x, label, y = height - 44) => addText(this, x, y, label, 15, { color: COLORS.muted, weight: '500' });
     if (mode === 'solo') {
       this.scoreTexts = [score(width / 2)];
       // On the top, your paddle runs along the top edge, so Best moves to the bottom
@@ -80,6 +80,10 @@ export class Game extends Scene {
     } else if (mode === 'aim') {
       this.scoreTexts = [];
       this.createAimGuide();
+    } else if (sideways) {
+      // Two players on the top and bottom: each score sits in that player's half
+      this.scoreTexts = [score(width / 2, height / 4), score(width / 2, (height * 3) / 4)];
+      this.serveHints = [hint(width / 2, 'A/D', 64), hint(width / 2, '←/→', height - 64)];
     } else {
       this.scoreTexts = [score(width / 4), score((width * 3) / 4)];
       const labels = {
@@ -142,7 +146,7 @@ export class Game extends Scene {
     // Cap the step so a slow frame doesn't fling the ball across the screen
     const dt = Math.min(delta / 1000, 1 / 30);
     const held = (names) => names.some((k) => this.keys[k].isDown);
-    const controls = this.view.sideways ? CONTROLS.soloSideways : CONTROLS[this.mode];
+    const controls = !this.view.sideways ? CONTROLS[this.mode] : this.mode === 'solo' ? CONTROLS.soloSideways : CONTROLS.versusSideways;
     const dirs = controls.map(({ up, down }) => (held(down) ? 1 : 0) - (held(up) ? 1 : 0));
 
     if (this.online) {

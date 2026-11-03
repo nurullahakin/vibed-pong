@@ -36,7 +36,9 @@ export class GameOver extends Scene {
       return;
     }
 
-    const names = mode === 'cpu' ? ['You win', 'The CPU wins'] : ['Left wins', 'Right wins'];
+    const names = mode === 'cpu'
+      ? ['You win', 'The CPU wins']
+      : this.result.options?.sides === 'topBottom' ? ['Top wins', 'Bottom wins'] : ['Left wins', 'Right wins'];
     // Starting Game again restarts it from scratch
     const playAgain = () => this.scene.start('Game', { mode, options: this.result.options });
     const toMenu = () => {

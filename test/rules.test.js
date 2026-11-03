@@ -52,7 +52,7 @@ test('solo: one miss ends the game', () => {
 });
 
 test('solo on the top or bottom: the field turns, so it is as long as the screen is tall', () => {
-  const state = createState('solo', { side: 'top' });
+  const state = createState('solo', { sideways: true });
   assert.deepEqual(state.field, { width: height, height: width });
   // Your paddle can travel the full screen width
   for (let i = 0; i < 120; i++) update(state, [1], DT);
@@ -60,14 +60,25 @@ test('solo on the top or bottom: the field turns, so it is as long as the screen
 });
 
 test('solo on the top or bottom: a player who never misses keeps scoring', () => {
-  const state = createState('solo', { side: 'bottom' });
+  const state = createState('solo', { sideways: true });
   play(state, 60 * 60, (i) => follow(state, 0, i));
   assert.equal(state.over, false);
   assert.ok(state.scores[0] > 10, `score ${state.scores[0]}`);
 });
 
 test('solo on the left or right: the field stays as it is', () => {
-  for (const side of ['left', 'right']) assert.deepEqual(createState('solo', { side }).field, { width, height });
+  assert.deepEqual(createState('solo').field, { width, height });
+});
+
+test('versus on the top and bottom: the field turns, and a match still plays to 11', () => {
+  const state = createState('versus', { sideways: true });
+  assert.deepEqual(state.field, { width: height, height: width });
+  play(state, 60 * 600, (i) => {
+    follow(state, 1, i);
+    dodge(state, 0);
+  });
+  assert.equal(state.over, true);
+  assert.deepEqual(state.scores, [0, CONFIG.winScore]);
 });
 
 test('versus: the ball waits before each serve', () => {

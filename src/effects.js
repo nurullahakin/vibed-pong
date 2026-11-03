@@ -25,8 +25,9 @@ const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').mat
 
 export class Effects {
   // paddleShapes: the drawn paddles by the rules' paddle number, with their origin
-  // in the center. view: how the field sits on screen (as it is, unless solo is turned).
-  constructor(scene, paddleShapes, view = makeView(), paddleTint = COLORS.left) {
+  // in the center. view: how the field sits on screen. paddleTints: each paddle's
+  // color, for its sparks.
+  constructor(scene, paddleShapes, view = makeView(), paddleTints = [COLORS.left, COLORS.right]) {
     this.scene = scene;
     this.paddleShapes = paddleShapes;
     this.view = view;
@@ -35,8 +36,8 @@ export class Effects {
     for (const [key, { angle, tint }] of Object.entries(SPRAY)) {
       this.sparks[key] = scene.add.particles(0, 0, sparkTexture(scene), {
         angle: { min: view.angle(angle.min), max: view.angle(angle.max) },
-        // In solo your paddle's sparks match its color, whichever side it's on
-        tint: key === 'paddle0' ? paddleTint : tint,
+        // A paddle's sparks match its color, whichever side it's on
+        tint: key === 'paddle0' ? paddleTints[0] : key === 'paddle1' ? paddleTints[1] ?? tint : tint,
         speed: { min: 80, max: 240 },
         lifespan: 300,
         scale: { start: 1, end: 0 },
