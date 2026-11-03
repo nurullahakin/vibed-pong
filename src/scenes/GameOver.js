@@ -38,7 +38,7 @@ export class GameOver extends Scene {
 
     const names = mode === 'cpu' ? ['You win', 'The CPU wins'] : ['Left wins', 'Right wins'];
     // Starting Game again restarts it from scratch
-    const playAgain = () => this.scene.start('Game', { mode });
+    const playAgain = () => this.scene.start('Game', { mode, options: this.result.options });
     const toMenu = () => {
       this.scene.stop('Game');
       this.scene.start('MainMenu');

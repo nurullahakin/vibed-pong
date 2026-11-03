@@ -17,6 +17,7 @@ export class Game extends Scene {
 
   init(data) {
     this.mode = data.mode;
+    this.options = data.options ?? {}; // e.g. { side: 'right' } for solo
     this.online = data.mode === 'online';
     this.seat = data.seat ?? 0; // online: 0 plays left, 1 plays right
     // Phaser reuses the scene object when a game restarts, so reset per-game flags
@@ -26,9 +27,8 @@ export class Game extends Scene {
   create() {
     const { width, height, wall } = CONFIG;
     const { mode } = this;
-    const onePaddle = mode === 'solo' || mode === 'aim';
     // Online starts from the same layout as a two-player game until the server's first update
-    this.state = rules.createState(this.online ? 'versus' : mode);
+    this.state = rules.createState(this.online ? 'versus' : mode, this.options);
 
     addBackground(this);
     // Walls are drawn as thin bars inside the space the rules give them
@@ -36,19 +36,25 @@ export class Game extends Scene {
     field.fillRoundedRect(12, wall / 2 - 2, width - 24, 4, 2);
     field.fillRoundedRect(12, height - wall / 2 - 2, width - 24, 4, 2);
     if (mode === 'solo') {
-      field.fillRoundedRect(width - wall / 2 - 2, 12, 4, height - 24, 2);
+      // The wall faces you: on the right if you play left, on the left if you play right
+      const wallX = this.state.side === 0 ? width - wall / 2 - 2 : wall / 2 - 2;
+      field.fillRoundedRect(wallX, 12, 4, height - 24, 2);
     } else if (mode !== 'aim') {
       for (let y = wall + 14; y < height - wall - 10; y += 28) field.fillRoundedRect(width / 2 - 2, y, 4, 12, 2);
     }
 
-    const shown = onePaddle ? this.state.paddles.slice(0, 1) : this.state.paddles;
+    // Which of the rules' two paddles are drawn: just yours in solo and aim practice
+    this.paddleIndexes = mode === 'aim' ? [0] : mode === 'solo' ? [this.state.side] : [0, 1];
     // Paddles are positioned by their center, so they squash evenly on a hit
     const textures = mode === 'aim'
       ? [this.aimPaddleTexture()]
       : [paddleTexture(this, 'paddle-left', COLORS.left, COLORS.left), paddleTexture(this, 'paddle-right', COLORS.right, COLORS.right)];
-    this.paddles = shown.map((p, i) => this.add.image(0, 0, textures[i]));
+    this.paddles = this.paddleIndexes.map((index) => this.add.image(0, 0, textures[index]));
     this.ball = this.add.image(0, 0, ballTexture(this));
-    this.effects = new Effects(this, this.paddles);
+    // Effects look paddles up by the rules' paddle number
+    const byIndex = [];
+    this.paddleIndexes.forEach((index, n) => { byIndex[index] = this.paddles[n]; });
+    this.effects = new Effects(this, byIndex);
 
     // Scores are big and faint, behind the play
     const score = (x) => addText(this, x, 130, '0', 120, { weight: '800', alpha: 0.14 }).setDepth(-5);
@@ -146,6 +152,7 @@ export class Game extends Scene {
         this.scene.pause();
         this.scene.launch('GameOver', {
           mode: this.mode,
+          options: this.options,
           scores: [...this.state.scores],
           best: this.registry.get('best'),
         });
@@ -157,7 +164,10 @@ export class Game extends Scene {
   sync() {
     const s = this.state;
     const { paddle: P } = CONFIG;
-    this.paddles.forEach((shape, i) => shape.setPosition(s.paddles[i].x + P.width / 2, s.paddles[i].y + P.height / 2));
+    this.paddles.forEach((shape, n) => {
+      const p = s.paddles[this.paddleIndexes[n]];
+      shape.setPosition(p.x + P.width / 2, p.y + P.height / 2);
+    });
     this.ball.setPosition(s.ball.x + CONFIG.ball.size / 2, s.ball.y + CONFIG.ball.size / 2);
     this.scoreTexts.forEach((text, i) => {
       if (text.text === String(s.scores[i])) return;

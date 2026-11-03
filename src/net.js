@@ -1,16 +1,11 @@
 // The connection to the multiplayer server, shared by the online scenes.
 // Builds point at the server in VITE_SERVER_URL. `npm run dev` uses a local one.
 
+import { loadPref, savePref } from './prefs.js';
+
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || (import.meta.env.DEV ? 'ws://localhost:8787' : '');
 
-// Your chosen player name is remembered in this browser. Storage can be blocked,
-// for example in private windows, so it's just skipped then.
-const NAME_KEY = 'pong.playerName';
 const PING_EVERY = 2000; // milliseconds between pings
-const storage = {
-  get: () => { try { return localStorage.getItem(NAME_KEY); } catch { return null; } },
-  set: (name) => { try { localStorage.setItem(NAME_KEY, name); } catch {} },
-};
 
 class Connection {
   constructor() {
@@ -54,7 +49,8 @@ class Connection {
         if (message.type === 'pong') this.ping = Math.round(performance.now() - message.time);
         if (message.type === 'welcome' || message.type === 'name') this.name = message.name;
         // Ask for the name chosen last time, instead of the "Player 3" the server gives
-        if (message.type === 'welcome' && storage.get()) this.send({ type: 'name', name: storage.get() });
+        // (remembered in this browser, see prefs.js)
+        if (message.type === 'welcome' && loadPref('playerName')) this.send({ type: 'name', name: loadPref('playerName') });
         this.emit(message);
       };
     });
@@ -75,7 +71,7 @@ class Connection {
 
   // Asks the server for a new name, and remembers it for next time
   setName(name) {
-    storage.set(name);
+    savePref('playerName', name);
     this.send({ type: 'name', name });
   }
 

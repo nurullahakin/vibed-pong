@@ -58,6 +58,8 @@ To try it out, click **Aim practice** on the start screen. See [Aim Practice](#a
 
 ## Solo
 
+Before the game starts, pick which side you play on: **Left** or **Right**. The wall is on the other side. Your choice is remembered for next time, so you can just press **Start**.
+
 Every time you hit the ball back, you get a point. Miss once and the game is over. The first serve always goes toward the back wall, so you have a moment to get ready.
 
 Your best score is shown in the top right. It's kept until you close or reload the page.

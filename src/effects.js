@@ -12,6 +12,7 @@ const SPRAY = {
   top: { angle: { min: 30, max: 150 }, tint: COLORS.spark },
   bottom: { angle: { min: 210, max: 330 }, tint: COLORS.spark },
   right: { angle: { min: 120, max: 240 }, tint: COLORS.spark },
+  left: { angle: { min: -60, max: 60 }, tint: COLORS.spark },
   paddle0: { angle: { min: -60, max: 60 }, tint: COLORS.left },
   paddle1: { angle: { min: 120, max: 240 }, tint: COLORS.right },
 };
@@ -56,6 +57,7 @@ export class Effects {
         if (e.wall === 'top') this.sparks.top.explode(count, cx, wall);
         if (e.wall === 'bottom') this.sparks.bottom.explode(count, cx, height - wall);
         if (e.wall === 'right') this.sparks.right.explode(count, width - wall, cy);
+        if (e.wall === 'left') this.sparks.left.explode(count, wall, cy);
       } else if (e.type === 'paddle') {
         const x = e.paddle === 0 ? b.x : b.x + B.size;
         this.sparks[`paddle${e.paddle}`].explode(count, x, cy);

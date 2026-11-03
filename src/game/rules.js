@@ -7,12 +7,15 @@ import { moveCpu } from './cpu.js';
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
 // mode: 'solo' | 'versus' | 'cpu' | 'aim'
-export function createState(mode) {
+// options.side: in solo, the side you play on, 'left' (the default) or 'right'.
+// The wall is on the other side.
+export function createState(mode, options = {}) {
   const { width, height, paddle } = CONFIG;
   const y = (height - paddle.height) / 2;
   const state = {
     mode,
-    scores: [0, 0], // solo only uses the first
+    side: mode === 'solo' && options.side === 'right' ? 1 : 0, // solo: your paddle, 0 left or 1 right
+    scores: [0, 0], // solo only uses the first, whichever side you're on
     over: false,
     paddles: [
       { x: paddle.inset, y, speed: 0, dir: 0 },
@@ -26,8 +29,9 @@ export function createState(mode) {
     aim: { round: 0, lastHit: null, showTimer: 0, ballId: 0 },
   };
   if (mode === 'aim') launchAimBall(state);
-  // Solo serves toward the far wall so the player has a moment to get ready
-  else serve(state, mode === 'solo' || Math.random() < 0.5 ? 1 : -1);
+  // Solo serves toward the wall, away from you, so you have a moment to get ready
+  else if (mode === 'solo') serve(state, state.side === 0 ? 1 : -1);
+  else serve(state, Math.random() < 0.5 ? 1 : -1);
   return state;
 }
 
@@ -77,10 +81,14 @@ export function update(state, dirs, dt) {
   const events = [];
   if (state.over) return events;
   const { width, height, wall, paddle: P, ball: B } = CONFIG;
-  const { mode } = state;
-  const hasRightPaddle = mode === 'versus' || mode === 'cpu';
+  const { mode, side } = state;
+  const solo = mode === 'solo';
+  // Which paddles are in play. Solo has only yours, with a wall on the other side.
+  const leftPaddle = !(solo && side === 1);
+  const rightPaddle = mode === 'versus' || mode === 'cpu' || (solo && side === 1);
 
-  dirs.forEach((dir, i) => movePaddle(state.paddles[i], dir, dt));
+  // In solo, the one input moves your paddle, whichever side it's on
+  dirs.forEach((dir, i) => movePaddle(state.paddles[solo ? side : i], dir, dt));
   if (mode === 'cpu') moveCpu(state, dt);
 
   // Paddles can move while the ball waits to be served
@@ -112,22 +120,27 @@ export function update(state, dirs, dt) {
     b.vy = -Math.abs(b.vy);
     events.push({ type: 'wall', wall: 'bottom' });
   }
-  if (mode === 'solo' && b.x + B.size > width - wall) {
+  if (solo && side === 0 && b.x + B.size > width - wall) {
     b.x = width - wall - B.size;
     b.vx = -Math.abs(b.vx);
     events.push({ type: 'wall', wall: 'right' });
+  } else if (solo && side === 1 && b.x < wall) {
+    b.x = wall;
+    b.vx = Math.abs(b.vx);
+    events.push({ type: 'wall', wall: 'left' });
   }
 
-  const hit = hitPaddle(state, 0, prev, events);
-  if (hit !== null && mode === 'solo') state.scores[0]++;
-  if (hit !== null && mode === 'aim') {
-    state.aim.lastHit = hit;
+  const leftHit = leftPaddle ? hitPaddle(state, 0, prev, events) : null;
+  const rightHit = rightPaddle ? hitPaddle(state, 1, prev, events) : null;
+  if (solo && (leftHit !== null || rightHit !== null)) state.scores[0]++;
+  if (mode === 'aim' && leftHit !== null) {
+    state.aim.lastHit = leftHit;
     state.aim.showTimer = CONFIG.aim.showTime;
   }
-  if (hasRightPaddle) hitPaddle(state, 1, prev, events);
 
-  if (b.x + B.size < 0) leaveField(state, 0, events);
-  else if (mode !== 'solo' && b.x > width) leaveField(state, 1, events);
+  if (leftPaddle && b.x + B.size < 0) leaveField(state, 0, events);
+  // Aim practice has no right paddle, but its balls fly off that way after a hit
+  else if ((rightPaddle || mode === 'aim') && b.x > width) leaveField(state, 1, events);
   return events;
 }
 
