@@ -51,36 +51,23 @@ test('solo: one miss ends the game', () => {
   assert.deepEqual(events.at(-1), { type: 'miss', side: 0 });
 });
 
-test('solo on the right: the wall moves to the left, and the first serve goes toward it', () => {
-  const state = createState('solo', { side: 'right' });
-  assert.equal(state.side, 1);
-  assert.ok(state.ball.vx < 0, 'serves toward the left wall');
-  // Let the ball reach the wall: it bounces back
-  const events = [];
-  for (let i = 0; i < 60 * 3 && !events.some((e) => e.wall === 'left'); i++) events.push(...update(state, [0], DT));
-  assert.ok(events.some((e) => e.type === 'wall' && e.wall === 'left'));
-  assert.ok(state.ball.vx > 0, 'heading back to the right');
+test('solo on the top or bottom: the field turns, so it is as long as the screen is tall', () => {
+  const state = createState('solo', { side: 'top' });
+  assert.deepEqual(state.field, { width: height, height: width });
+  // Your paddle can travel the full screen width
+  for (let i = 0; i < 120; i++) update(state, [1], DT);
+  assert.equal(state.paddles[0].y, width - CONFIG.wall - P.height);
 });
 
-test('solo on the right: your input moves the right paddle, and hits score', () => {
-  const state = createState('solo', { side: 'right' });
-  const left = state.paddles[0].y;
-  const right = state.paddles[1].y;
-  for (let i = 0; i < 30; i++) update(state, [1], DT);
-  assert.ok(state.paddles[1].y > right, 'right paddle moved');
-  assert.equal(state.paddles[0].y, left, 'left paddle unused');
-
-  const rally = createState('solo', { side: 'right' });
-  play(rally, 60 * 60, (i) => follow(rally, 1, i));
-  assert.equal(rally.over, false);
-  assert.ok(rally.scores[0] > 10, `score ${rally.scores[0]}`);
+test('solo on the top or bottom: a player who never misses keeps scoring', () => {
+  const state = createState('solo', { side: 'bottom' });
+  play(state, 60 * 60, (i) => follow(state, 0, i));
+  assert.equal(state.over, false);
+  assert.ok(state.scores[0] > 10, `score ${state.scores[0]}`);
 });
 
-test('solo on the right: missing on the right ends the game', () => {
-  const state = createState('solo', { side: 'right' });
-  const events = play(state, 60 * 30, () => dodge(state, 1));
-  assert.equal(state.over, true);
-  assert.deepEqual(events.at(-1), { type: 'miss', side: 1 });
+test('solo on the left or right: the field stays as it is', () => {
+  for (const side of ['left', 'right']) assert.deepEqual(createState('solo', { side }).field, { width, height });
 });
 
 test('versus: the ball waits before each serve', () => {

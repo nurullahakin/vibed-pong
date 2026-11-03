@@ -1,18 +1,21 @@
 // Visual effects that react to what happens in the game: a ball trail, sparks
 // on impact, a paddle squash, a screen shake on a miss and a score pop.
 // They only change how things look, never the game itself.
+//
+// Positions and directions start on the rules' field and go through the view,
+// which turns them to match where you play on screen.
 
 import { CONFIG } from './game/config.js';
 import { sparkTexture } from './textures.js';
 import { COLORS } from './theme.js';
+import { makeView } from './view.js';
 
-// Which way sparks fly, in degrees (0 is right, 90 is down), away from what was
-// hit, and their color: the paddle's own, or a pale blue off the walls
+// Which way sparks fly on the field, in degrees (0 is along x, 90 along y), away
+// from what was hit, and their color: the paddle's own, or a pale blue off the walls
 const SPRAY = {
   top: { angle: { min: 30, max: 150 }, tint: COLORS.spark },
   bottom: { angle: { min: 210, max: 330 }, tint: COLORS.spark },
   right: { angle: { min: 120, max: 240 }, tint: COLORS.spark },
-  left: { angle: { min: -60, max: 60 }, tint: COLORS.spark },
   paddle0: { angle: { min: -60, max: 60 }, tint: COLORS.left },
   paddle1: { angle: { min: 120, max: 240 }, tint: COLORS.right },
 };
@@ -21,16 +24,19 @@ const SPRAY = {
 const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
 export class Effects {
-  // paddleShapes: the drawn paddles, left first, with their origin in the center
-  constructor(scene, paddleShapes) {
+  // paddleShapes: the drawn paddles by the rules' paddle number, with their origin
+  // in the center. view: how the field sits on screen (as it is, unless solo is turned).
+  constructor(scene, paddleShapes, view = makeView(), paddleTint = COLORS.left) {
     this.scene = scene;
     this.paddleShapes = paddleShapes;
+    this.view = view;
 
     this.sparks = {};
     for (const [key, { angle, tint }] of Object.entries(SPRAY)) {
       this.sparks[key] = scene.add.particles(0, 0, sparkTexture(scene), {
-        angle,
-        tint,
+        angle: { min: view.angle(angle.min), max: view.angle(angle.max) },
+        // In solo your paddle's sparks match its color, whichever side it's on
+        tint: key === 'paddle0' ? paddleTint : tint,
         speed: { min: 80, max: 240 },
         lifespan: 300,
         scale: { start: 1, end: 0 },
@@ -43,9 +49,17 @@ export class Effects {
     this.trailPoints = [];
   }
 
+  // Sparks at a point on the field
+  burst(key, count, x, y) {
+    const at = this.view.point(x, y);
+    this.sparks[key].explode(count, at.x, at.y);
+  }
+
   // Call once per frame with the events from rules.update()
   play(events, state) {
-    const { width, height, wall, ball: B } = CONFIG;
+    const { wall, ball: B } = CONFIG;
+    // An older server may not send the field; it is the screen size then
+    const { width, height } = state.field ?? CONFIG;
     const b = state.ball;
     const cx = b.x + B.size / 2;
     const cy = b.y + B.size / 2;
@@ -54,13 +68,11 @@ export class Effects {
 
     for (const e of events) {
       if (e.type === 'wall') {
-        if (e.wall === 'top') this.sparks.top.explode(count, cx, wall);
-        if (e.wall === 'bottom') this.sparks.bottom.explode(count, cx, height - wall);
-        if (e.wall === 'right') this.sparks.right.explode(count, width - wall, cy);
-        if (e.wall === 'left') this.sparks.left.explode(count, wall, cy);
+        if (e.wall === 'top') this.burst('top', count, cx, wall);
+        if (e.wall === 'bottom') this.burst('bottom', count, cx, height - wall);
+        if (e.wall === 'right') this.burst('right', count, width - wall, cy);
       } else if (e.type === 'paddle') {
-        const x = e.paddle === 0 ? b.x : b.x + B.size;
-        this.sparks[`paddle${e.paddle}`].explode(count, x, cy);
+        this.burst(`paddle${e.paddle}`, count, e.paddle === 0 ? b.x : b.x + B.size, cy);
         this.squash(this.paddleShapes[e.paddle]);
       } else if (e.type === 'miss' && !reduceMotion) {
         this.scene.cameras.main.shake(180, 0.008);
@@ -69,7 +81,8 @@ export class Effects {
     this.drawTrail(state);
   }
 
-  // The paddle bulges for a moment when it hits the ball
+  // The paddle bulges for a moment when it hits the ball. Its own x is its
+  // thickness, even when it's turned to lie flat.
   squash(shape) {
     if (!shape) return;
     this.scene.tweens.killTweensOf(shape);
@@ -104,8 +117,9 @@ export class Effects {
     this.trailPoints.forEach((p, i) => {
       const t = (i + 1) / (n + 1); // 0 for the oldest copy, nearly 1 for the newest
       const size = B.size * (0.4 + 0.6 * t);
+      const at = this.view.point(p.x + B.size / 2, p.y + B.size / 2);
       this.trail.fillStyle(COLORS.ball, t * 0.35);
-      this.trail.fillCircle(p.x + B.size / 2, p.y + B.size / 2, size / 2);
+      this.trail.fillCircle(at.x, at.y, size / 2);
     });
   }
 }

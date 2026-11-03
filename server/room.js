@@ -164,9 +164,10 @@ export class Room {
 
 // The part of the game state players need to draw it
 function snapshot(state) {
-  const { mode, scores, over, paddles, ball, serveTimer } = state;
+  const { mode, field, scores, over, paddles, ball, serveTimer } = state;
   return {
     mode,
+    field,
     scores,
     over,
     serveTimer,

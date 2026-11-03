@@ -5,8 +5,9 @@ import { Effects } from '../effects.js';
 import { net } from '../net.js';
 import { playEvents } from '../sound.js';
 import { ballTexture, paddleTexture } from '../textures.js';
-import { COLORS, css } from '../theme.js';
+import { COLORS, SIDE_COLORS, css } from '../theme.js';
 import { addBackground, addText, addMutedLabel, bindMuteKey } from '../ui.js';
+import { makeView } from '../view.js';
 
 // Runs one game: reads the keys, steps the rules, then moves the shapes to match.
 // Online, the server steps the rules instead, and this scene draws what it sends.
@@ -17,7 +18,7 @@ export class Game extends Scene {
 
   init(data) {
     this.mode = data.mode;
-    this.options = data.options ?? {}; // e.g. { side: 'right' } for solo
+    this.options = data.options ?? {}; // e.g. { side: 'top' } for solo
     this.online = data.mode === 'online';
     this.seat = data.seat ?? 0; // online: 0 plays left, 1 plays right
     // Phaser reuses the scene object when a game restarts, so reset per-game flags
@@ -29,39 +30,53 @@ export class Game extends Scene {
     const { mode } = this;
     // Online starts from the same layout as a two-player game until the server's first update
     this.state = rules.createState(this.online ? 'versus' : mode, this.options);
+    // In solo you can play on any side: the view turns the rules' field to put you there
+    const side = mode === 'solo' ? this.options.side ?? 'left' : 'left';
+    this.view = makeView(side);
 
     addBackground(this);
-    // Walls are drawn as thin bars inside the space the rules give them
-    const field = this.add.graphics().fillStyle(COLORS.line);
-    field.fillRoundedRect(12, wall / 2 - 2, width - 24, 4, 2);
-    field.fillRoundedRect(12, height - wall / 2 - 2, width - 24, 4, 2);
+    // Walls are thin bars inside the space the rules give them, drawn on the
+    // rules' field and turned by the view
+    const fieldShape = this.add.graphics().fillStyle(COLORS.line);
+    const bar = (x, y, w, h) => {
+      const a = this.view.point(x, y);
+      const b = this.view.point(x + w, y + h);
+      fieldShape.fillRoundedRect(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y), 2);
+    };
+    const field = this.state.field;
+    bar(12, wall / 2 - 2, field.width - 24, 4);
+    bar(12, field.height - wall / 2 - 2, field.width - 24, 4);
     if (mode === 'solo') {
-      // The wall faces you: on the right if you play left, on the left if you play right
-      const wallX = this.state.side === 0 ? width - wall / 2 - 2 : wall / 2 - 2;
-      field.fillRoundedRect(wallX, 12, 4, height - 24, 2);
+      bar(field.width - wall / 2 - 2, 12, 4, field.height - 24); // the wall you play against
     } else if (mode !== 'aim') {
-      for (let y = wall + 14; y < height - wall - 10; y += 28) field.fillRoundedRect(width / 2 - 2, y, 4, 12, 2);
+      for (let y = wall + 14; y < field.height - wall - 10; y += 28) bar(field.width / 2 - 2, y, 4, 12);
     }
 
     // Which of the rules' two paddles are drawn: just yours in solo and aim practice
-    this.paddleIndexes = mode === 'aim' ? [0] : mode === 'solo' ? [this.state.side] : [0, 1];
-    // Paddles are positioned by their center, so they squash evenly on a hit
+    this.paddleIndexes = mode === 'aim' || mode === 'solo' ? [0] : [0, 1];
+    // Every side has its own paddle color, and in solo yours is your side's
+    const sideTexture = (name) => paddleTexture(this, `paddle-${name}`, SIDE_COLORS[name], SIDE_COLORS[name]);
+    const paddleColor = SIDE_COLORS[side];
     const textures = mode === 'aim'
       ? [this.aimPaddleTexture()]
-      : [paddleTexture(this, 'paddle-left', COLORS.left, COLORS.left), paddleTexture(this, 'paddle-right', COLORS.right, COLORS.right)];
-    this.paddles = this.paddleIndexes.map((index) => this.add.image(0, 0, textures[index]));
+      : mode === 'solo' ? [sideTexture(side)] : [sideTexture('left'), sideTexture('right')];
+    // Paddles are positioned by their center, so they squash evenly on a hit.
+    // On the top or bottom they're turned to lie flat.
+    this.paddles = this.paddleIndexes.map((index, n) => this.add.image(0, 0, textures[n]).setAngle(this.view.sideways ? 90 : 0));
     this.ball = this.add.image(0, 0, ballTexture(this));
     // Effects look paddles up by the rules' paddle number
     const byIndex = [];
     this.paddleIndexes.forEach((index, n) => { byIndex[index] = this.paddles[n]; });
-    this.effects = new Effects(this, byIndex);
+    this.effects = new Effects(this, byIndex, this.view, paddleColor);
 
     // Scores are big and faint, behind the play
     const score = (x) => addText(this, x, 130, '0', 120, { weight: '800', alpha: 0.14 }).setDepth(-5);
     const hint = (x, label) => addText(this, x, height - 44, label, 15, { color: COLORS.muted, weight: '500' });
     if (mode === 'solo') {
       this.scoreTexts = [score(width / 2)];
-      this.bestText = addText(this, width - 20, 46, '', 15, { color: COLORS.muted, originX: 1 });
+      // On the top, your paddle runs along the top edge, so Best moves to the bottom
+      const bestY = side === 'top' ? height - 30 : 46;
+      this.bestText = addText(this, width - 20, bestY, '', 15, { color: COLORS.muted, originX: 1 });
     } else if (mode === 'aim') {
       this.scoreTexts = [];
       this.createAimGuide();
@@ -75,7 +90,7 @@ export class Game extends Scene {
       this.serveHints = labels.map((label, i) => hint((width * (1 + 2 * i)) / 4, label));
     }
 
-    this.keys = this.input.keyboard.addKeys('W,S,UP,DOWN');
+    this.keys = this.input.keyboard.addKeys('W,S,UP,DOWN,A,D,LEFT,RIGHT');
     // P and Esc both pause. Online, the match can't stop, so the pause screen
     // just sits on top while play goes on.
     const pause = () => {
@@ -127,7 +142,8 @@ export class Game extends Scene {
     // Cap the step so a slow frame doesn't fling the ball across the screen
     const dt = Math.min(delta / 1000, 1 / 30);
     const held = (names) => names.some((k) => this.keys[k].isDown);
-    const dirs = CONTROLS[this.mode].map(({ up, down }) => (held(down) ? 1 : 0) - (held(up) ? 1 : 0));
+    const controls = this.view.sideways ? CONTROLS.soloSideways : CONTROLS[this.mode];
+    const dirs = controls.map(({ up, down }) => (held(down) ? 1 : 0) - (held(up) ? 1 : 0));
 
     if (this.online) {
       // Only tell the server when the direction changes
@@ -166,9 +182,11 @@ export class Game extends Scene {
     const { paddle: P } = CONFIG;
     this.paddles.forEach((shape, n) => {
       const p = s.paddles[this.paddleIndexes[n]];
-      shape.setPosition(p.x + P.width / 2, p.y + P.height / 2);
+      const at = this.view.point(p.x + P.width / 2, p.y + P.height / 2);
+      shape.setPosition(at.x, at.y);
     });
-    this.ball.setPosition(s.ball.x + CONFIG.ball.size / 2, s.ball.y + CONFIG.ball.size / 2);
+    const ball = this.view.point(s.ball.x + CONFIG.ball.size / 2, s.ball.y + CONFIG.ball.size / 2);
+    this.ball.setPosition(ball.x, ball.y);
     this.scoreTexts.forEach((text, i) => {
       if (text.text === String(s.scores[i])) return;
       text.setText(s.scores[i]);

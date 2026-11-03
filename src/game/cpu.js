@@ -6,7 +6,8 @@ const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 // few times a second, moves slower than the player and aims a bit off-center,
 // so it can be beaten.
 export function moveCpu(state, dt) {
-  const { height, wall, paddle: P, ball: B, cpu } = CONFIG;
+  const { wall, paddle: P, ball: B, cpu } = CONFIG;
+  const { height } = state.field;
   const p = state.paddles[1];
   const b = state.ball;
   const c = state.cpu;

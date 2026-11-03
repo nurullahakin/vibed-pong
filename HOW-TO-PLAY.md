@@ -18,6 +18,7 @@ In a game:
 |---|---|
 | `W` / `S` | Move the left paddle |
 | `↑` / `↓` | Move the right paddle in two-player. In solo and against the CPU, they move your paddle too. |
+| `A` / `D` or `←` / `→` | Move your paddle in solo on the top or bottom |
 | `Esc` or `P` | Pause and resume |
 | `M` | Sound on and off |
 
@@ -58,7 +59,7 @@ To try it out, click **Aim practice** on the start screen. See [Aim Practice](#a
 
 ## Solo
 
-Before the game starts, pick which side you play on: **Left** or **Right**. The wall is on the other side. Your choice is remembered for next time, so you can just press **Start**.
+Before the game starts, pick which side you play on: **Left**, **Top**, **Bottom** or **Right**. The wall is on the other side. On the top or bottom your paddle lies flat: move it with `A`/`D` or `←`/`→`. Your choice is remembered for next time, so you can just press **Start**.
 
 Every time you hit the ball back, you get a point. Miss once and the game is over. The first serve always goes toward the back wall, so you have a moment to get ready.
 

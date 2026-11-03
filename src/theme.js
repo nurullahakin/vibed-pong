@@ -12,12 +12,17 @@ export const COLORS = {
   muted: 0x8a93ad,
   accent: 0x7aa2ff, // the highlighted button
   accentText: 0x10142a,
-  left: 0x6ea8ff, // left paddle, and the solo paddle
+  left: 0x6ea8ff, // left paddle
   right: 0xff7a90, // right paddle
+  top: 0x5fe0b5, // solo paddle on the top (mint)
+  bottom: 0xb48cff, // solo paddle on the bottom (violet)
   ball: 0xffffff,
   spark: 0xc9d4ff, // sparks off the walls
   warn: 0xffb86b, // low frame rate or high ping
 };
+
+// Each side of the screen has its own paddle color
+export const SIDE_COLORS = { left: COLORS.left, right: COLORS.right, top: COLORS.top, bottom: COLORS.bottom };
 
 export const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
