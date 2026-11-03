@@ -7,7 +7,7 @@ import { playEvents } from '../sound.js';
 import { ballTexture, paddleTexture } from '../textures.js';
 import { COLORS, SIDE_COLORS, css } from '../theme.js';
 import { addBackground, addText, addMutedLabel, bindMuteKey } from '../ui.js';
-import { viewFor } from '../view.js';
+import { OPPOSITE, viewFor } from '../view.js';
 
 // Runs one game: reads the keys, steps the rules, then moves the shapes to match.
 // Online, the server steps the rules instead, and this scene draws what it sends.
@@ -58,7 +58,9 @@ export class Game extends Scene {
     // Every side has its own paddle color: in solo yours is your side's, and two
     // players on the top and bottom get those two
     const sideTexture = (name) => paddleTexture(this, `paddle-${name}`, SIDE_COLORS[name], SIDE_COLORS[name]);
-    const paddleSides = mode === 'solo' ? [side] : sideways ? ['top', 'bottom'] : ['left', 'right'];
+    const paddleSides = mode === 'solo' ? [side]
+      : mode === 'cpu' ? [side, OPPOSITE[side]] // you, then the CPU across from you
+        : sideways ? ['top', 'bottom'] : ['left', 'right'];
     const textures = mode === 'aim' ? [this.aimPaddleTexture()] : paddleSides.map(sideTexture);
     // Paddles are positioned by their center, so they squash evenly on a hit.
     // On the top or bottom they're turned to lie flat.
@@ -80,18 +82,20 @@ export class Game extends Scene {
     } else if (mode === 'aim') {
       this.scoreTexts = [];
       this.createAimGuide();
-    } else if (sideways) {
-      // Two players on the top and bottom: each score sits in that player's half
-      this.scoreTexts = [score(width / 2, height / 4), score(width / 2, (height * 3) / 4)];
-      this.serveHints = [hint(width / 2, 'A/D', 64), hint(width / 2, '←/→', height - 64)];
     } else {
-      this.scoreTexts = [score(width / 4), score((width * 3) / 4)];
+      // Each paddle's score sits in that paddle's half of the screen, and its key
+      // hint at that half's outer edge, whichever way the field is turned
+      const half = (i) => this.view.point((this.state.field.width * (1 + 2 * i)) / 4, this.state.field.height / 2);
+      this.scoreTexts = [0, 1].map((i) => (sideways ? score(width / 2, half(i).y) : score(half(i).x)));
+      const keys = sideways ? 'A/D or ←/→' : 'W/S or ↑/↓';
       const labels = {
-        versus: ['W/S', '↑/↓'],
-        cpu: ['W/S or ↑/↓', 'CPU'],
+        versus: sideways ? ['A/D', '←/→'] : ['W/S', '↑/↓'],
+        cpu: [keys, 'CPU'],
         online: this.seat === 0 ? ['You: W/S or ↑/↓', 'Them'] : ['Them', 'You: W/S or ↑/↓'],
       }[mode];
-      this.serveHints = labels.map((label, i) => hint((width * (1 + 2 * i)) / 4, label));
+      this.serveHints = labels.map((label, i) => (sideways
+        ? hint(width / 2, label, half(i).y < height / 2 ? 64 : height - 64)
+        : hint(half(i).x, label)));
     }
 
     this.keys = this.input.keyboard.addKeys('W,S,UP,DOWN,A,D,LEFT,RIGHT');
@@ -146,7 +150,7 @@ export class Game extends Scene {
     // Cap the step so a slow frame doesn't fling the ball across the screen
     const dt = Math.min(delta / 1000, 1 / 30);
     const held = (names) => names.some((k) => this.keys[k].isDown);
-    const controls = !this.view.sideways ? CONTROLS[this.mode] : this.mode === 'solo' ? CONTROLS.soloSideways : CONTROLS.versusSideways;
+    const controls = !this.view.sideways ? CONTROLS[this.mode] : this.mode === 'versus' ? CONTROLS.versusSideways : CONTROLS.oneSideways;
     const dirs = controls.map(({ up, down }) => (held(down) ? 1 : 0) - (held(up) ? 1 : 0));
 
     if (this.online) {

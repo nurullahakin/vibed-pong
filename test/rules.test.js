@@ -81,6 +81,13 @@ test('versus on the top and bottom: the field turns, and a match still plays to 
   assert.deepEqual(state.scores, [0, CONFIG.winScore]);
 });
 
+test('cpu on the top or bottom: the turned field plays a full match', () => {
+  const state = createState('cpu', { sideways: true });
+  play(state, 60 * 600, () => {});
+  assert.equal(state.over, true);
+  assert.equal(state.scores[1], CONFIG.winScore);
+});
+
 test('versus: the ball waits before each serve', () => {
   const state = createState('versus');
   const x = state.ball.x;

@@ -4,7 +4,7 @@ import { createState } from '../game/rules.js';
 import { loadPref, savePref } from '../prefs.js';
 import { COLORS, SIDE_COLORS, css } from '../theme.js';
 import { addBackground, addSelection, addText, addMutedLabel, bindMuteKey, pillButton } from '../ui.js';
-import { viewFor } from '../view.js';
+import { OPPOSITE, viewFor } from '../view.js';
 
 // The options each mode asks for before it starts. choices: [option value, label].
 const SETUPS = {
@@ -15,6 +15,14 @@ const SETUPS = {
     option: 'side',
     choices: [['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom'], ['right', 'Right']],
     keys: (sideways) => (sideways ? 'Move with A/D or ←/→' : 'Move with W/S or ↑/↓'),
+  },
+  cpu: {
+    title: 'Against the CPU',
+    subtitle: 'Beat the computer, first to 11',
+    question: 'YOUR SIDE',
+    option: 'side',
+    choices: [['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom'], ['right', 'Right']],
+    keys: (sideways) => (sideways ? 'Move with A/D or ←/→  ·  The CPU is across from you' : 'Move with W/S or ↑/↓  ·  The CPU is across from you'),
   },
   versus: {
     title: 'Two players',
@@ -51,6 +59,7 @@ export class Setup extends Scene {
     addText(this, width / 2, 106, subtitle, 17, { color: COLORS.muted, weight: '500' });
     addText(this, width / 2, 152, question, 12, { color: COLORS.muted, weight: '700', spacing: 2 });
     this.preview = this.add.graphics();
+    this.previewLabels = [];
     this.keysHint = addText(this, width / 2, 424, '', 14, { color: COLORS.muted, weight: '500' });
 
     const start = () => {
@@ -148,8 +157,18 @@ export class Setup extends Scene {
       for (let d = inset + 20; d < field.height - inset - 20; d += 60) box(field.width / 2 - 4, d, 8, 30, COLORS.line);
     }
     // Paddles in their sides' colors
-    const sides = solo ? [view.side] : view.sideways ? ['top', 'bottom'] : ['left', 'right'];
+    const sides = solo ? [view.side]
+      : this.mode === 'cpu' ? [view.side, OPPOSITE[view.side]]
+        : view.sideways ? ['top', 'bottom'] : ['left', 'right'];
     sides.forEach((name, i) => box(paddles[i].x - 4, paddles[i].y, P.width + 8, P.height, SIDE_COLORS[name], 3));
+
+    // Against the CPU, say which paddle is whose: left and right look alike otherwise
+    this.previewLabels.forEach((label) => label.destroy());
+    this.previewLabels = this.mode !== 'cpu' ? [] : ['You', 'CPU'].map((text, i) => {
+      // A spot a little in from each paddle, toward the middle
+      const at = view.point(i === 0 ? paddles[0].x + 120 : paddles[1].x - 110, field.height / 2);
+      return addText(this, left + at.x * scale, top + at.y * scale, text, 12, { color: SIDE_COLORS[sides[i]], weight: '700' });
+    });
     const ball = view.point(field.width * 0.55, field.height * 0.4);
     g.fillStyle(COLORS.ball).fillCircle(left + ball.x * scale, top + ball.y * scale, 4);
   }

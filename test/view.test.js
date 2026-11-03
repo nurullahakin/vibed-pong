@@ -65,6 +65,18 @@ test('view: two players on the top and bottom face each other across the screen'
   assert.equal(viewFor('cpu', { sides: 'topBottom' }).side, 'left', 'only two players can turn');
 });
 
+test('view: against the CPU, it sits across from you on every side', () => {
+  for (const side of SIDES) {
+    const view = viewFor('cpu', { side });
+    const state = createState('cpu', { sideways: view.sideways });
+    const [you, cpu] = state.paddles.map((p) => view.point(p.x + CONFIG.paddle.width / 2, p.y + CONFIG.paddle.height / 2));
+    const across = view.sideways ? Math.abs(you.y - cpu.y) : Math.abs(you.x - cpu.x);
+    assert.ok(across > (view.sideways ? height : width) - 100, `${side}: you at ${JSON.stringify(you)}, CPU at ${JSON.stringify(cpu)}`);
+  }
+  const right = viewFor('cpu', { side: 'right' });
+  assert.ok(right.point(CONFIG.paddle.inset, 0).x > width / 2, 'on the right, your paddle is on the right');
+});
+
 test('view: top and bottom lay paddles flat, left and right keep them upright', () => {
   assert.deepEqual(SIDES.map((side) => makeView(side).sideways), [false, false, true, true]);
 });

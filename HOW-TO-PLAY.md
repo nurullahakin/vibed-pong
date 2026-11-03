@@ -18,7 +18,7 @@ In a game:
 |---|---|
 | `W` / `S` | Move the left paddle |
 | `↑` / `↓` | Move the right paddle in two-player. In solo and against the CPU, they move your paddle too. |
-| `A` / `D` or `←` / `→` | Move your paddle in solo on the top or bottom. In two-player on the top and bottom, `A`/`D` moves the top paddle and `←`/`→` the bottom one. |
+| `A` / `D` or `←` / `→` | Move your paddle in solo or against the CPU on the top or bottom. In two-player on the top and bottom, `A`/`D` moves the top paddle and `←`/`→` the bottom one. |
 | `Esc` or `P` | Pause and resume |
 | `M` | Sound on and off |
 
@@ -75,7 +75,7 @@ After each point, the ball waits a second at the center, then serves toward the 
 
 ## Against the CPU
 
-Same rules as two players: you're on the left, the computer is on the right, and first to 11 wins.
+Before the game starts, pick your side: **Left**, **Top**, **Bottom** or **Right**. The computer plays from the side across from you. Same rules as two players: first to 11 wins. On the top or bottom you move with `A`/`D` or `←`/`→`.
 
 The CPU is good but not perfect. Its paddle never gets as fast as yours, and it reacts a moment late. It can't predict bounces, so steep shots off your paddle's edge are your best weapon (see [Aiming](#aiming)). It also doesn't always hit with the middle of its paddle, so watch for odd angles coming back.
 

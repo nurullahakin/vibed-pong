@@ -86,6 +86,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-11-03** — Against the CPU gets a setup screen too: pick your side, and the CPU plays from across.
 - **2026-11-03** — Two players get a setup screen too: play on the left and right, or the top and bottom.
 - **2026-11-03** — Each side has its own paddle color: blue left, coral right, mint top, violet bottom.
 - **2026-11-03** — Solo can be played on the top or bottom too, with the paddle lying flat.
