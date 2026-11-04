@@ -4,7 +4,13 @@ A 2D Pong game in the browser. Start small, add features later.
 
 Built with Phaser 4 and Vite, and published on GitHub Pages. Online play runs on a small Node server.
 
-## v0.10 — Pick Your Side (now)
+## v0.11 — Mouse Controls (now)
+
+- Solo, CPU and aim practice ask **Keys**, **Mouse** or **Both** on the setup screen. The choice is remembered.
+- The mouse works like holding a key toward the pointer: the paddle speeds up as with keys and stops when it gets there
+- With Both, whichever you used last is in charge
+
+## v0.10 — Pick Your Side (done)
 
 - Every mode has a setup screen before it starts. Your choice is remembered.
 - Play on any side: left, right, top or bottom. On the top or bottom the paddle lies flat and moves with `A`/`D` or `←`/`→`.
@@ -95,6 +101,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-11-04** — v0.11 built: play with keys, the mouse or both.
 - **2026-11-04** — A third control option, Both: keys and mouse together, and whichever you used last is in charge.
 - **2026-11-04** — Solo, CPU and aim practice can be played with the mouse, picked on the setup screen. The paddle heads for the pointer like a held key.
 - **2026-11-04** — v0.10 built: pick your side, in every mode.
