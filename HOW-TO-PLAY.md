@@ -87,6 +87,8 @@ You start out as something like **Player 3**. Pick **Your name** to choose your 
 
 Inside a room, **Room name** and **Your name** let either of you rename the room or yourself while you wait.
 
+Each of you can pick **your side**: **Left**, **Right**, **Top** or **Bottom**. The other player moves across from you. You can't pick the side they're on; it's faded out. Changing it un-readies you both, so you both agree before the match starts. On the top or bottom you move with `A`/`D` or `←`/`→`.
+
 In the room, both of you press **Ready**. After a short countdown the match starts, with the same rules as two players: first to 11. You control your own paddle with `W`/`S` or `↑`/`↓`, whichever side you're on.
 
 The match can't be paused. `Esc` opens a menu where you can leave, but play goes on while it's open. After a match, you both go back to the room for a rematch.

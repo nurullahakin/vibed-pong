@@ -91,6 +91,61 @@ export function pillButton(scene, x, y, label, onPick, width = BUTTON.width) {
   };
 }
 
+// A choice button, for addSelection: filled in blue while highlighted, outlined
+// in blue with a ✓ while chosen. isChosen() is asked each time it's drawn.
+export function choiceButton(scene, x, y, w, label, isChosen, onPick) {
+  const h = 46;
+  const bg = scene.add.graphics({ x, y });
+  const text = addText(scene, x, y, label, 17);
+  let highlighted = false;
+  const draw = (on = highlighted) => {
+    highlighted = on;
+    const chosen = isChosen();
+    bg.clear();
+    bg.fillStyle(on ? COLORS.accent : chosen ? COLORS.panelHover : COLORS.panel).fillRoundedRect(-w / 2, -h / 2, w, h, h / 2);
+    if (!on) bg.lineStyle(chosen ? 2 : 1.5, chosen ? COLORS.accent : COLORS.panelBorder).strokeRoundedRect(-w / 2, -h / 2, w, h, h / 2);
+    text.setText(chosen ? `✓  ${label}` : label);
+    text.setColor(css(on ? COLORS.accentText : chosen ? COLORS.accent : COLORS.text));
+  };
+  return { key: label, zone: scene.add.zone(x, y, w, h), parts: [bg, text], draw, pick: onPick };
+}
+
+// A choice that can't be picked right now: a faded pill with a dashed outline,
+// the same size as choiceButton. Not clickable. Returns its parts to destroy.
+export function disabledChoice(scene, x, y, w, label) {
+  const h = 46;
+  const r = h / 2;
+  const bg = scene.add.graphics({ x, y }).setAlpha(0.45);
+  const text = addText(scene, x, y, label, 17, { color: COLORS.muted });
+  text.setAlpha(0.6);
+  // The outline as a loop of points: top edge, right end, bottom edge, left end
+  const straight = w - h;
+  const arc = Math.PI * r;
+  const perimeter = 2 * straight + 2 * arc;
+  const at = (d) => {
+    if (d < straight) return [-straight / 2 + d, -r];
+    d -= straight;
+    if (d < arc) { const a = -Math.PI / 2 + d / r; return [straight / 2 + r * Math.cos(a), r * Math.sin(a)]; }
+    d -= arc;
+    if (d < straight) return [straight / 2 - d, r];
+    d -= straight;
+    const a = Math.PI / 2 + d / r;
+    return [-straight / 2 + r * Math.cos(a), r * Math.sin(a)];
+  };
+  bg.lineStyle(1.5, COLORS.panelBorder);
+  const dash = 7;
+  const gap = 5;
+  for (let d = 0; d < perimeter; d += dash + gap) {
+    bg.beginPath();
+    for (let s = d; s <= Math.min(d + dash, perimeter); s += 1) {
+      const [px, py] = at(s);
+      if (s === d) bg.moveTo(px, py); else bg.lineTo(px, py);
+    }
+    bg.strokePath();
+  }
+  return [bg, text];
+}
+
 // A column of pill buttons. items: [[label, onClick], ...].
 export function addMenu(scene, x, y, spacing, items) {
   return addSelection(scene, items.map(([label, onClick], i) => pillButton(scene, x, y + i * spacing, label, onClick)));

@@ -5,6 +5,7 @@
 import { createState, update } from '../src/game/rules.js';
 
 const TICK = 1 / 60; // seconds per game step
+const OPPOSITE = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' };
 // Timers aren't exact: on Windows, one asked to fire 60 times a second fires about
 // 35 times. So the loop checks twice as often as needed, and each check runs as
 // many game steps as the real time that has passed calls for.
@@ -21,6 +22,7 @@ export class Room {
     this.players = []; // [{ player, ready, dir }], seat 0 plays left, seat 1 right
     this.status = 'waiting'; // waiting | countdown | playing
     this.notice = null;
+    this.firstSide = 'left'; // the first seat's side of the screen; the second seat is across from it
   }
 
   get full() {
@@ -34,6 +36,7 @@ export class Room {
       name: this.name,
       players: this.players.map((p) => p.player.name),
       status: this.status,
+      firstSide: this.firstSide,
     };
   }
 
@@ -69,6 +72,23 @@ export class Room {
   }
 
   // Either player can rename the room while it isn't mid-match
+  // Either player can pick their own side while waiting: left, right, top or
+  // bottom, but not the side the other player is on. The other player moves
+  // across from them. Both are un-readied, so nobody starts on a side they
+  // didn't agree to.
+  setSide(player, side) {
+    const seat = this.seat(player);
+    if (seat === -1 || this.status !== 'waiting' || !OPPOSITE[side]) return;
+    const theirSide = seat === 0 ? OPPOSITE[this.firstSide] : this.firstSide;
+    if (this.players[1 - seat] && side === theirSide) return; // taken
+    const firstSide = seat === 0 ? side : OPPOSITE[side];
+    if (firstSide === this.firstSide) return;
+    this.firstSide = firstSide;
+    for (const p of this.players) p.ready = false;
+    this.broadcastRoom();
+    this.onChange();
+  }
+
   rename(player, name) {
     if (this.seat(player) === -1 || this.status === 'playing' || !name || name === this.name) return;
     this.name = name;
@@ -101,10 +121,11 @@ export class Room {
   startMatch() {
     clearInterval(this.timer);
     this.status = 'playing';
-    this.state = createState('versus');
+    // On the top and bottom, the field is turned on its side, like a local game
+    this.state = createState('versus', { sideways: this.firstSide === 'top' || this.firstSide === 'bottom' });
     this.players.forEach((p, seat) => {
       p.dir = 0;
-      p.player.send({ type: 'start', seat });
+      p.player.send({ type: 'start', seat, firstSide: this.firstSide });
     });
     this.lastTick = Date.now();
     this.unplayed = 0; // seconds of real time not yet turned into game steps
@@ -149,6 +170,7 @@ export class Room {
           id: this.id,
           name: this.name,
           status: this.status,
+          firstSide: this.firstSide,
           notice: this.notice,
           players: this.players.map((q) => ({ name: q.player.name, ready: q.ready })),
         },

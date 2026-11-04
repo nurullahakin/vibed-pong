@@ -18,7 +18,7 @@ export class Game extends Scene {
 
   init(data) {
     this.mode = data.mode;
-    this.options = data.options ?? {}; // e.g. { side: 'top' } for solo, { sides: 'topBottom' } for two players
+    this.options = data.options ?? {}; // e.g. { side: 'top' } for solo, { sides: 'topBottom' } for two players, { firstSide: 'right' } online
     this.online = data.mode === 'online';
     this.seat = data.seat ?? 0; // online: 0 plays left, 1 plays right
     // Phaser reuses the scene object when a game restarts, so reset per-game flags
@@ -59,7 +59,7 @@ export class Game extends Scene {
     // players on the top and bottom get those two
     const sideTexture = (name) => paddleTexture(this, `paddle-${name}`, SIDE_COLORS[name], SIDE_COLORS[name]);
     const paddleSides = mode === 'solo' || mode === 'aim' ? [side]
-      : mode === 'cpu' ? [side, OPPOSITE[side]] // you, then the CPU across from you
+      : mode === 'cpu' || mode === 'online' ? [side, OPPOSITE[side]] // the first paddle, then the one across
         : sideways ? ['top', 'bottom'] : ['left', 'right'];
     const textures = mode === 'aim' ? [this.aimPaddleTexture()] : paddleSides.map(sideTexture);
     // Paddles are positioned by their center, so they squash evenly on a hit.
@@ -93,7 +93,7 @@ export class Game extends Scene {
       const labels = {
         versus: sideways ? ['A/D', '←/→'] : ['W/S', '↑/↓'],
         cpu: [keys, 'CPU'],
-        online: this.seat === 0 ? ['You: W/S or ↑/↓', 'Them'] : ['Them', 'You: W/S or ↑/↓'],
+        online: this.seat === 0 ? [`You: ${keys}`, 'Them'] : ['Them', `You: ${keys}`],
       }[mode];
       this.serveHints = labels.map((label, i) => (sideways
         ? hint(width / 2, label, half(i).y < height / 2 ? 64 : height - 64)

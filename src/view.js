@@ -17,10 +17,12 @@ export const OPPOSITE = { left: 'right', right: 'left', top: 'bottom', bottom: '
 
 // The view for a game's mode and options. In solo, against the CPU and in aim
 // practice you can be on any side ({ side: 'top' }), with the wall or the CPU opposite; two
-// players can be left and right, or top and bottom ({ sides: 'topBottom' }).
-// Everything else is shown as it is.
+// players can be left and right, or top and bottom ({ sides: 'topBottom' });
+// an online room puts its first seat on any side ({ firstSide: 'top' }), with
+// the second across. Everything else is shown as it is.
 export function viewFor(mode, options = {}) {
   if (mode === 'solo' || mode === 'cpu' || mode === 'aim') return makeView(options.side ?? 'left');
+  if (mode === 'online') return makeView(options.firstSide ?? 'left');
   if (mode === 'versus' && options.sides === 'topBottom') return makeView('top');
   return makeView('left');
 }

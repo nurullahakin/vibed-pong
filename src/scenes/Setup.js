@@ -3,7 +3,7 @@ import { CONFIG } from '../game/config.js';
 import { createState } from '../game/rules.js';
 import { loadPref, savePref } from '../prefs.js';
 import { COLORS, SIDE_COLORS, css } from '../theme.js';
-import { addBackground, addSelection, addText, addMutedLabel, bindMuteKey, pillButton } from '../ui.js';
+import { addBackground, addSelection, addText, addMutedLabel, bindMuteKey, choiceButton, pillButton } from '../ui.js';
 import { OPPOSITE, viewFor } from '../view.js';
 
 // The options each mode asks for before it starts. choices: [option value, label].
@@ -77,8 +77,15 @@ export class Setup extends Scene {
     const back = () => this.scene.start('MainMenu');
     // Buttons share a 632-wide row, so two are wide and four are narrow
     const buttonWidth = 632 / choices.length - 12;
-    this.choiceButtons = choices.map(([value, label], i) =>
-      this.choiceButton(width / 2 + (i - (choices.length - 1) / 2) * (buttonWidth + 12), 194, buttonWidth, value, label));
+    const pickChoice = (value) => {
+      this.choice = value;
+      this.choiceButtons.forEach((button) => button.draw());
+      this.showChoice();
+    };
+    this.choiceButtons = choices.map(([value, label], i) => choiceButton(
+      this, width / 2 + (i - (choices.length - 1) / 2) * (buttonWidth + 12), 194, buttonWidth, label,
+      () => this.choice === value, () => pickChoice(value),
+    ));
     // Start is highlighted first, so Enter plays straight away with the last choice
     addSelection(this, [
       ...this.choiceButtons,
@@ -95,34 +102,6 @@ export class Setup extends Scene {
 
   get options() {
     return { [this.setup.option]: this.choice };
-  }
-
-  // A choice button: filled in blue while highlighted, outlined in blue while chosen
-  choiceButton(x, y, w, value, label) {
-    const h = 46;
-    const bg = this.add.graphics({ x, y });
-    const text = addText(this, x, y, label, 17);
-    let highlighted = false;
-    const draw = (on = highlighted) => {
-      highlighted = on;
-      const chosen = this.choice === value;
-      bg.clear();
-      bg.fillStyle(on ? COLORS.accent : chosen ? COLORS.panelHover : COLORS.panel).fillRoundedRect(-w / 2, -h / 2, w, h, h / 2);
-      if (!on) bg.lineStyle(chosen ? 2 : 1.5, chosen ? COLORS.accent : COLORS.panelBorder).strokeRoundedRect(-w / 2, -h / 2, w, h, h / 2);
-      text.setText(chosen ? `✓  ${label}` : label);
-      text.setColor(css(on ? COLORS.accentText : chosen ? COLORS.accent : COLORS.text));
-    };
-    return {
-      key: label,
-      zone: this.add.zone(x, y, w, h),
-      parts: [bg, text],
-      draw,
-      pick: () => {
-        this.choice = value;
-        this.choiceButtons.forEach((button) => button.draw());
-        this.showChoice();
-      },
-    };
   }
 
   showChoice() {

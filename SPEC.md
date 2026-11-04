@@ -86,6 +86,10 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-11-04** — Online sides are grouped in facing pairs: (Left Right) (Top Bottom).
+- **2026-11-04** — Online, the side the other player is on is faded out and can't be picked.
+- **2026-11-04** — Online, each player can pick any side for themselves (left, right, top or bottom), and the other moves across.
+- **2026-11-04** — Online rooms can play on the left and right, or the top and bottom. Either player picks.
 - **2026-11-04** — Name boxes open with the cursor at the end of the name, instead of the whole name selected.
 - **2026-11-04** — Aim practice gets a setup screen too: pick your side. On the top or bottom, the aim guide talks about left and right.
 - **2026-11-03** — Against the CPU gets a setup screen too: pick your side, and the CPU plays from across.
@@ -124,6 +128,7 @@ Like juggling a football: keep the ball going as long as you can.
 - Online play uses a plain Node server with the `ws` package. The server runs the same rules as local play and is the only one that decides what happens. Players only send which way they're pressing, and get the game state 60 times a second.
 - The room name box is a real HTML input over the game, not text drawn by Phaser, so typing, the cursor, copy and paste and every language's letters work. While it has focus, the game's own keys are switched off, and so is Phaser's blocking of `W`, `S` and the arrows, which otherwise lasts after any game.
 - Your player name is remembered in the browser's local storage and sent again on every connect. If storage is blocked, as in some private windows, you just start as "Player N" again.
+- Online, either player picks their own side, and the other goes across. The other player's side is faded out, so picking means moving, not swapping. The room only stores the first seat's side. Changing it un-readies both, so nobody starts on a side they didn't agree to. The server turns the field the same way local games do, and both players see the match the same way round.
 - Either player in a room can rename it, since a room is just two friends with no host. Renaming is blocked mid-match.
 - Room and player names are cleaned on the server: trimmed, invisible characters removed, and cut to 24 characters for rooms or 16 for players. An empty room name gets a random one; an empty player name is ignored.
 - The server steps online matches by the real time that has passed, in fixed 1/60 s steps. Timers aren't exact (on Windows, a 60-a-second timer fires about 35 times), so stepping once per timer tick made everything slow.

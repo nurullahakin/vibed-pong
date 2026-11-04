@@ -62,7 +62,8 @@ test('view: two players on the top and bottom face each other across the screen'
   const [top, bottom] = state.paddles.map((p) => view.point(p.x + CONFIG.paddle.width / 2, p.y + CONFIG.paddle.height / 2));
   assert.ok(top.y < 50 && bottom.y > height - 50, `paddles at ${top.y} and ${bottom.y}`);
   assert.equal(viewFor('versus').side, 'left', 'left and right by default');
-  assert.equal(viewFor('cpu', { sides: 'topBottom' }).side, 'left', 'only two players can turn');
+  assert.equal(viewFor('cpu', { sides: 'topBottom' }).side, 'left', 'the CPU picks a side instead');
+  for (const side of SIDES) assert.equal(viewFor('online', { firstSide: side }).side, side, 'online rooms put the first seat on any side');
 });
 
 test('view: against the CPU, it sits across from you on every side', () => {

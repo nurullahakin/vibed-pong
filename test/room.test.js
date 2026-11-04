@@ -38,7 +38,7 @@ test('room: two players fill it, and a third is turned away', (t) => {
 test('room: the room list shows its name, its players and what it is doing', (t) => {
   t.after(() => mock.timers.reset());
   const { room } = setup();
-  assert.deepEqual(room.info(), { id: 'TEST', name: 'Test Room', players: ['A', 'B'], status: 'waiting' });
+  assert.deepEqual(room.info(), { id: 'TEST', name: 'Test Room', players: ['A', 'B'], status: 'waiting', firstSide: 'left' });
 });
 
 test('room: either player can rename it, but not mid-match or from outside', (t) => {
@@ -56,6 +56,49 @@ test('room: either player can rename it, but not mid-match or from outside', (t)
   assert.equal(room.name, 'Friday Night');
 });
 
+test('room: either player can pick any side, and the other moves across, un-readied', (t) => {
+  t.after(() => mock.timers.reset());
+  const { room, a, b } = setup();
+  room.setReady(a, true);
+  room.setSide(b, 'top'); // the second player takes the top, so the first gets the bottom
+  assert.equal(a.last('room').room.firstSide, 'bottom', 'the other player sees it');
+  assert.deepEqual(a.last('room').room.players.map((p) => p.ready), [false, false]);
+  room.setSide(a, 'right');
+  assert.equal(room.firstSide, 'right');
+  room.setSide(a, 'middle'); // not a side
+  room.setSide(fakePlayer('Stranger'), 'left');
+  assert.equal(room.firstSide, 'right');
+});
+
+test('room: you cannot take the side the other player is on', (t) => {
+  t.after(() => mock.timers.reset());
+  const { room, a, b } = setup();
+  room.setSide(a, 'right'); // B is on the right
+  assert.equal(room.firstSide, 'left');
+  room.setReady(b, true);
+  room.setSide(b, 'left'); // A is on the left
+  assert.equal(room.firstSide, 'left');
+  assert.equal(b.last('room').room.players[1].ready, true, 'a refused change un-readies nobody');
+  // Alone in the room, every side is open
+  room.leave(b);
+  room.setSide(a, 'right');
+  assert.equal(room.firstSide, 'right');
+});
+
+test('room: a top-and-bottom match runs on the turned field, and cannot change mid-match', (t) => {
+  t.after(() => mock.timers.reset());
+  const { room, a, b } = setup();
+  room.setSide(a, 'top');
+  room.setReady(a, true);
+  room.setReady(b, true);
+  advance(3000);
+  assert.equal(a.last('start').firstSide, 'top');
+  advance(100);
+  assert.deepEqual(a.last('state').state.field, { width: 600, height: 800 });
+  room.setSide(b, 'left');
+  assert.equal(room.firstSide, 'top');
+});
+
 test('room: the match starts after both are ready and a countdown', (t) => {
   t.after(() => mock.timers.reset());
   const { room, a, b } = setup();
@@ -67,8 +110,8 @@ test('room: the match starts after both are ready and a countdown', (t) => {
 
   advance(3000);
   assert.equal(room.status, 'playing');
-  assert.deepEqual(a.last('start'), { type: 'start', seat: 0 });
-  assert.deepEqual(b.last('start'), { type: 'start', seat: 1 });
+  assert.deepEqual(a.last('start'), { type: 'start', seat: 0, firstSide: 'left' });
+  assert.deepEqual(b.last('start'), { type: 'start', seat: 1, firstSide: 'left' });
 
   advance(1000);
   assert.ok(a.inbox.filter((m) => m.type === 'state').length >= 50, 'about 60 updates a second');

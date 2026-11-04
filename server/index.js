@@ -104,6 +104,9 @@ wss.on('connection', (socket) => {
       case 'leave':
         leaveRoom(player);
         break;
+      case 'set-side':
+        player.room?.setSide(player, message.side);
+        break;
       case 'rename-room':
         player.room?.rename(player, cleanRoomName(message.name));
         break;
