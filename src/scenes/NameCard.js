@@ -85,10 +85,11 @@ export class NameCard extends Scene {
     addMenu(this, width / 2, top + 222, 62, [[action, submit], ['Cancel', cancel]]);
     this.input.keyboard.on('keydown-ESC', cancel);
 
+    // Puts a name in the box with the cursor at the end, ready to edit
     const fill = (name) => {
       input.value = name;
       input.focus();
-      input.select();
+      input.setSelectionRange(name.length, name.length);
     };
     shuffle.addEventListener('click', () => fill(random()));
     input.addEventListener('keydown', (event) => {
@@ -110,7 +111,7 @@ export class NameCard extends Scene {
     });
     this.events.once('shutdown', () => keyboard.enableGlobalCapture());
 
-    // Start with the given name, selected, so typing replaces it
+    // Start with the given name
     this.time.delayedCall(50, () => fill(value));
   }
 

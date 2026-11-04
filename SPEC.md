@@ -86,6 +86,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-11-04** — Name boxes open with the cursor at the end of the name, instead of the whole name selected.
 - **2026-11-04** — Aim practice gets a setup screen too: pick your side. On the top or bottom, the aim guide talks about left and right.
 - **2026-11-03** — Against the CPU gets a setup screen too: pick your side, and the CPU plays from across.
 - **2026-11-03** — Two players get a setup screen too: play on the left and right, or the top and bottom.
