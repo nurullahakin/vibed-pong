@@ -59,7 +59,7 @@ To try it out, click **Aim practice** on the start screen. See [Aim Practice](#a
 
 ## Solo
 
-Before the game starts, pick which side you play on: **Left**, **Top**, **Bottom** or **Right**. The wall is on the other side. On the top or bottom your paddle lies flat: move it with `A`/`D` or `←`/`→`. Your choice is remembered for next time, so you can just press **Start**.
+Before the game starts, pick which side you play on: **Left**, **Right**, **Top** or **Bottom**. The wall is on the other side. On the top or bottom your paddle lies flat: move it with `A`/`D` or `←`/`→`. Your choice is remembered for next time, so you can just press **Start**.
 
 Every time you hit the ball back, you get a point. Miss once and the game is over. The first serve always goes toward the back wall, so you have a moment to get ready.
 
@@ -75,7 +75,7 @@ After each point, the ball waits a second at the center, then serves toward the 
 
 ## Against the CPU
 
-Before the game starts, pick your side: **Left**, **Top**, **Bottom** or **Right**. The computer plays from the side across from you. Same rules as two players: first to 11 wins. On the top or bottom you move with `A`/`D` or `←`/`→`.
+Before the game starts, pick your side: **Left**, **Right**, **Top** or **Bottom**. The computer plays from the side across from you. Same rules as two players: first to 11 wins. On the top or bottom you move with `A`/`D` or `←`/`→`.
 
 The CPU is good but not perfect. Its paddle never gets as fast as yours, and it reacts a moment late. It can't predict bounces, so steep shots off your paddle's edge are your best weapon (see [Aiming](#aiming)). It also doesn't always hit with the middle of its paddle, so watch for odd angles coming back.
 
@@ -95,7 +95,7 @@ The match can't be paused. `Esc` opens a menu where you can leave, but play goes
 
 ## Aim Practice
 
-Before it starts, pick your side: **Left**, **Top**, **Bottom** or **Right**. On the top or bottom you move with `A`/`D` or `←`/`→`.
+Before it starts, pick your side: **Left**, **Right**, **Top** or **Bottom**. On the top or bottom you move with `A`/`D` or `←`/`→`.
 
 Balls come at you one at a time: first straight, then from above, then from below, and around again. Each one heads for the middle of your paddle's line.
 

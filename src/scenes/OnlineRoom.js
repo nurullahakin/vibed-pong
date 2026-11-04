@@ -2,14 +2,10 @@ import { Scene } from 'phaser';
 import { CONFIG } from '../game/config.js';
 import { net } from '../net.js';
 import { COLORS, SIDE_COLORS, css } from '../theme.js';
-import { addBackground, addSelection, addText, addMutedLabel, bindMuteKey, choiceButton, disabledChoice, pillButton } from '../ui.js';
+import { addBackground, addSelection, addText, addMutedLabel, bindMuteKey, choiceButton, disabledChoice, pillButton, SIDE_BUTTON_WIDTH, SIDE_CHOICES, sideButtonX } from '../ui.js';
 import { OPPOSITE } from '../view.js';
 import { openNameCard, playerNameCard, roomNameCard } from './NameCard.js';
 
-// The sides you can pick, in pairs that face each other: (Left Right)  (Top Bottom).
-// Picking one puts the other player on its partner.
-const SIDE_CHOICES = [['left', 'Left'], ['right', 'Right'], ['top', 'Top'], ['bottom', 'Bottom']];
-const SIDE_BUTTON = { width: 140, step: 148, pairGap: 48 };
 const SIDE_NAMES = Object.fromEntries(SIDE_CHOICES);
 const CARD = { width: 260, height: 130, gap: 30, y: 290 };
 
@@ -107,14 +103,11 @@ export class OnlineRoom extends Scene {
     this.takenParts = [];
     const sideButtons = [];
     SIDE_CHOICES.forEach(([value, label], i) => {
-      // Each pair sits on its own side of the middle, with a wider gap between pairs
-      const { width: w, step, pairGap } = SIDE_BUTTON;
-      const inner = pairGap / 2 + w / 2;
-      const x = width / 2 + [-inner - step, -inner, inner, inner + step][i];
+      const x = sideButtonX(width / 2, i);
       if (value === theirSide) {
-        this.takenParts.push(...disabledChoice(this, x, 184, SIDE_BUTTON.width, label));
+        this.takenParts.push(...disabledChoice(this, x, 184, SIDE_BUTTON_WIDTH, label));
       } else {
-        sideButtons.push(choiceButton(this, x, 184, SIDE_BUTTON.width, label, () => mySide === value, () => net.send({ type: 'set-side', side: value })));
+        sideButtons.push(choiceButton(this, x, 184, SIDE_BUTTON_WIDTH, label, () => mySide === value, () => net.send({ type: 'set-side', side: value })));
       }
     });
     this.menu = addSelection(this, [

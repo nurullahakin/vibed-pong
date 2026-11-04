@@ -86,6 +86,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-11-04** — Setup screens group the sides in facing pairs too, like online rooms.
 - **2026-11-04** — Online sides are grouped in facing pairs: (Left Right) (Top Bottom).
 - **2026-11-04** — Online, the side the other player is on is faded out and can't be picked.
 - **2026-11-04** — Online, each player can pick any side for themselves (left, right, top or bottom), and the other moves across.

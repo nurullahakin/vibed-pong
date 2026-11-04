@@ -110,6 +110,18 @@ export function choiceButton(scene, x, y, w, label, isChosen, onPick) {
   return { key: label, zone: scene.add.zone(x, y, w, h), parts: [bg, text], draw, pick: onPick };
 }
 
+// The four sides you can pick, in pairs that face each other: (Left Right)  (Top Bottom)
+export const SIDE_CHOICES = [['left', 'Left'], ['right', 'Right'], ['top', 'Top'], ['bottom', 'Bottom']];
+export const SIDE_BUTTON_WIDTH = 140;
+
+// Where side button i goes: each pair on its own side of the middle, with a
+// wider gap between the pairs than inside them
+export function sideButtonX(centerX, i) {
+  const step = SIDE_BUTTON_WIDTH + 8;
+  const inner = 24 + SIDE_BUTTON_WIDTH / 2;
+  return centerX + [-inner - step, -inner, inner, inner + step][i];
+}
+
 // A choice that can't be picked right now: a faded pill with a dashed outline,
 // the same size as choiceButton. Not clickable. Returns its parts to destroy.
 export function disabledChoice(scene, x, y, w, label) {

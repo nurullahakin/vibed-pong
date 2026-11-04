@@ -3,7 +3,7 @@ import { CONFIG } from '../game/config.js';
 import { createState } from '../game/rules.js';
 import { loadPref, savePref } from '../prefs.js';
 import { COLORS, SIDE_COLORS, css } from '../theme.js';
-import { addBackground, addSelection, addText, addMutedLabel, bindMuteKey, choiceButton, pillButton } from '../ui.js';
+import { addBackground, addSelection, addText, addMutedLabel, bindMuteKey, choiceButton, pillButton, SIDE_BUTTON_WIDTH, SIDE_CHOICES, sideButtonX } from '../ui.js';
 import { OPPOSITE, viewFor } from '../view.js';
 
 // The options each mode asks for before it starts. choices: [option value, label].
@@ -13,7 +13,7 @@ const SETUPS = {
     subtitle: 'Keep the ball going as long as you can',
     question: 'YOUR SIDE',
     option: 'side',
-    choices: [['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom'], ['right', 'Right']],
+    choices: SIDE_CHOICES,
     keys: (sideways) => (sideways ? 'Move with A/D or ←/→' : 'Move with W/S or ↑/↓'),
   },
   cpu: {
@@ -21,7 +21,7 @@ const SETUPS = {
     subtitle: 'Beat the computer, first to 11',
     question: 'YOUR SIDE',
     option: 'side',
-    choices: [['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom'], ['right', 'Right']],
+    choices: SIDE_CHOICES,
     keys: (sideways) => (sideways ? 'Move with A/D or ←/→  ·  The CPU is across from you' : 'Move with W/S or ↑/↓  ·  The CPU is across from you'),
   },
   aim: {
@@ -29,7 +29,7 @@ const SETUPS = {
     subtitle: 'Learn how your paddle aims',
     question: 'YOUR SIDE',
     option: 'side',
-    choices: [['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom'], ['right', 'Right']],
+    choices: SIDE_CHOICES,
     keys: (sideways) => (sideways ? 'Move with A/D or ←/→' : 'Move with W/S or ↑/↓'),
   },
   versus: {
@@ -75,15 +75,17 @@ export class Setup extends Scene {
       this.scene.start('Game', { mode: this.mode, options: { [option]: this.choice } });
     };
     const back = () => this.scene.start('MainMenu');
-    // Buttons share a 632-wide row, so two are wide and four are narrow
-    const buttonWidth = 632 / choices.length - 12;
+    // Two choices share a wide row; the four sides go in facing pairs
+    const sidesRow = choices === SIDE_CHOICES;
+    const buttonWidth = sidesRow ? SIDE_BUTTON_WIDTH : 632 / choices.length - 12;
+    const buttonX = (i) => (sidesRow ? sideButtonX(width / 2, i) : width / 2 + (i - (choices.length - 1) / 2) * (buttonWidth + 12));
     const pickChoice = (value) => {
       this.choice = value;
       this.choiceButtons.forEach((button) => button.draw());
       this.showChoice();
     };
     this.choiceButtons = choices.map(([value, label], i) => choiceButton(
-      this, width / 2 + (i - (choices.length - 1) / 2) * (buttonWidth + 12), 194, buttonWidth, label,
+      this, buttonX(i), 194, buttonWidth, label,
       () => this.choice === value, () => pickChoice(value),
     ));
     // Start is highlighted first, so Enter plays straight away with the last choice
