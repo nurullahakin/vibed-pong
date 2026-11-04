@@ -88,6 +88,12 @@ test('cpu on the top or bottom: the turned field plays a full match', () => {
   assert.equal(state.scores[1], CONFIG.winScore);
 });
 
+test('aim on the top or bottom: balls still arrive at the middle of the turned field', () => {
+  const state = createState('aim', { sideways: true });
+  playAimBall(state); // the paddle stays in the middle
+  assert.ok(Math.abs(state.aim.lastHit) < 0.05, `hit ${state.aim.lastHit}`);
+});
+
 test('versus: the ball waits before each serve', () => {
   const state = createState('versus');
   const x = state.ball.x;

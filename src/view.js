@@ -15,12 +15,12 @@ const TURNS = {
 export const SIDES = Object.keys(TURNS);
 export const OPPOSITE = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' };
 
-// The view for a game's mode and options. In solo and against the CPU you can
-// be on any side ({ side: 'top' }), with the wall or the CPU opposite; two
+// The view for a game's mode and options. In solo, against the CPU and in aim
+// practice you can be on any side ({ side: 'top' }), with the wall or the CPU opposite; two
 // players can be left and right, or top and bottom ({ sides: 'topBottom' }).
 // Everything else is shown as it is.
 export function viewFor(mode, options = {}) {
-  if (mode === 'solo' || mode === 'cpu') return makeView(options.side ?? 'left');
+  if (mode === 'solo' || mode === 'cpu' || mode === 'aim') return makeView(options.side ?? 'left');
   if (mode === 'versus' && options.sides === 'topBottom') return makeView('top');
   return makeView('left');
 }

@@ -18,7 +18,7 @@ In a game:
 |---|---|
 | `W` / `S` | Move the left paddle |
 | `↑` / `↓` | Move the right paddle in two-player. In solo and against the CPU, they move your paddle too. |
-| `A` / `D` or `←` / `→` | Move your paddle in solo or against the CPU on the top or bottom. In two-player on the top and bottom, `A`/`D` moves the top paddle and `←`/`→` the bottom one. |
+| `A` / `D` or `←` / `→` | Move your paddle in solo, against the CPU or in aim practice on the top or bottom. In two-player on the top and bottom, `A`/`D` moves the top paddle and `←`/`→` the bottom one. |
 | `Esc` or `P` | Pause and resume |
 | `M` | Sound on and off |
 
@@ -93,9 +93,11 @@ The match can't be paused. `Esc` opens a menu where you can leave, but play goes
 
 ## Aim Practice
 
+Before it starts, pick your side: **Left**, **Top**, **Bottom** or **Right**. On the top or bottom you move with `A`/`D` or `←`/`→`.
+
 Balls come at you one at a time: first straight, then from above, then from below, and around again. Each one heads for the middle of your paddle's line.
 
-Your paddle is colored to show where it sends the ball: **blue** at the top sends it up, **white** in the middle sends it straight, and **red** at the bottom sends it down. The deeper the color, the steeper the shot.
+Your paddle is colored to show where it sends the ball: **blue** at the top sends it up, **white** in the middle sends it straight, and **red** at the bottom sends it down. On the top or bottom, the paddle lies flat with blue on the left and red on the right, sending the ball left or right. The deeper the color, the steeper the shot.
 
 Move your paddle so the ball hits a different part of it, and see what happens. After each hit:
 

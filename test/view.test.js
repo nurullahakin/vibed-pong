@@ -77,6 +77,10 @@ test('view: against the CPU, it sits across from you on every side', () => {
   assert.ok(right.point(CONFIG.paddle.inset, 0).x > width / 2, 'on the right, your paddle is on the right');
 });
 
+test('view: aim practice can be on any side too', () => {
+  for (const side of SIDES) assert.equal(viewFor('aim', { side }).side, side);
+});
+
 test('view: top and bottom lay paddles flat, left and right keep them upright', () => {
   assert.deepEqual(SIDES.map((side) => makeView(side).sideways), [false, false, true, true]);
 });

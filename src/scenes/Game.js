@@ -58,13 +58,15 @@ export class Game extends Scene {
     // Every side has its own paddle color: in solo yours is your side's, and two
     // players on the top and bottom get those two
     const sideTexture = (name) => paddleTexture(this, `paddle-${name}`, SIDE_COLORS[name], SIDE_COLORS[name]);
-    const paddleSides = mode === 'solo' ? [side]
+    const paddleSides = mode === 'solo' || mode === 'aim' ? [side]
       : mode === 'cpu' ? [side, OPPOSITE[side]] // you, then the CPU across from you
         : sideways ? ['top', 'bottom'] : ['left', 'right'];
     const textures = mode === 'aim' ? [this.aimPaddleTexture()] : paddleSides.map(sideTexture);
     // Paddles are positioned by their center, so they squash evenly on a hit.
     // On the top or bottom they're turned to lie flat.
-    this.paddles = this.paddleIndexes.map((index, n) => this.add.image(0, 0, textures[n]).setAngle(this.view.sideways ? 90 : 0));
+    // (turned counter-clockwise, so the paddle's top end lands where the view puts
+    // the field's top: on the left. That keeps the aim paddle's colors the right way round.)
+    this.paddles = this.paddleIndexes.map((index, n) => this.add.image(0, 0, textures[n]).setAngle(this.view.sideways ? -90 : 0));
     this.ball = this.add.image(0, 0, ballTexture(this));
     // Effects look paddles up by the rules' paddle number
     const byIndex = [];
@@ -215,6 +217,7 @@ export class Game extends Scene {
 
   // Colors the aim practice paddle by where it sends the ball: blue at the top
   // (steep up), white in the middle (straight), red at the bottom (steep down).
+  // Lying flat, blue is on the left and red on the right.
   // The angle changes evenly along the paddle, so a smooth gradient matches it.
   aimPaddleTexture() {
     return paddleTexture(this, 'paddle-aim', (ctx, top, height) => {
@@ -229,14 +232,16 @@ export class Game extends Scene {
   // Aim practice shows where the ball hit the paddle and the path it took after
   createAimGuide() {
     const { width, height } = CONFIG;
-    this.aimText = addText(this, width / 2, 62, '', 22);
-    addText(this, width / 2, height - 44, 'Hit with different parts of your paddle  ·  Esc to pause', 15, {
+    // Keep the texts clear of your paddle when it runs along the top or bottom edge
+    const hintY = this.view.side === 'bottom' ? height - 90 : height - 44;
+    this.aimText = addText(this, width / 2, this.view.side === 'top' ? 92 : 62, '', 22);
+    addText(this, width / 2, hintY, 'Hit with different parts of your paddle  ·  Esc to pause', 15, {
       color: COLORS.muted,
       weight: '500',
     });
     this.trail = this.add.graphics();
     this.trailPoints = [];
-    this.hitMarker = this.add.circle(0, 0, 3, COLORS.ball).setOrigin(0, 0.5);
+    this.hitMarker = this.add.circle(0, 0, 3, COLORS.ball);
     this.ballId = null;
   }
 
@@ -251,13 +256,17 @@ export class Game extends Scene {
     const hit = aim.lastHit;
     this.hitMarker.setVisible(hit !== null);
     if (hit === null) {
-      this.aimText.setText(`Incoming: ${rules.aimPattern(this.state).name}`);
+      // The rules' "above" and "below" are the left and right once the field lies flat
+      const { name } = rules.aimPattern(this.state);
+      const sidewaysName = { 'from above': 'from the left', 'from below': 'from the right' }[name];
+      this.aimText.setText(`Incoming: ${this.view.sideways && sidewaysName ? sidewaysName : name}`);
     } else {
-      this.aimText.setText(describeHit(hit));
+      this.aimText.setText(describeHit(hit, this.view.sideways));
       // The marker rides along with the paddle, at the spot the ball touched
       const p = paddles[0];
-      this.hitMarker.setPosition(p.x + P.width + 2, p.y + P.height / 2 + (hit * P.height) / 2);
-      this.trailPoints.push({ x: ball.x + B.size / 2, y: ball.y + B.size / 2 });
+      const marker = this.view.point(p.x + P.width + 5, p.y + P.height / 2 + (hit * P.height) / 2);
+      this.hitMarker.setPosition(marker.x, marker.y);
+      this.trailPoints.push(this.view.point(ball.x + B.size / 2, ball.y + B.size / 2));
     }
 
     this.trail.clear();
@@ -269,13 +278,14 @@ export class Game extends Scene {
 }
 
 // Puts a paddle hit into words, e.g. "Top edge → steep up, 54°".
-// offset runs from -1 (top edge) to 1 (bottom edge).
-function describeHit(offset) {
+// offset runs from -1 (top edge) to 1 (bottom edge). A paddle lying flat has a
+// left and right edge instead, sending the ball left and right.
+function describeHit(offset, sideways = false) {
   const size = Math.abs(offset);
   const degrees = Math.round((size * CONFIG.maxBounceAngle * 180) / Math.PI);
   if (size < 0.15) return `Middle → straight, ${degrees}°`;
-  const side = offset < 0 ? 'Top' : 'Bottom';
-  const dir = offset < 0 ? 'up' : 'down';
+  const [first, second] = sideways ? [['Left', 'left'], ['Right', 'right']] : [['Top', 'up'], ['Bottom', 'down']];
+  const [side, dir] = offset < 0 ? first : second;
   return size > 0.7
     ? `${side} edge → steep ${dir}, ${degrees}°`
     : `${side} half → angled ${dir}, ${degrees}°`;

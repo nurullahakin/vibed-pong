@@ -24,6 +24,14 @@ const SETUPS = {
     choices: [['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom'], ['right', 'Right']],
     keys: (sideways) => (sideways ? 'Move with A/D or ←/→  ·  The CPU is across from you' : 'Move with W/S or ↑/↓  ·  The CPU is across from you'),
   },
+  aim: {
+    title: 'Aim practice',
+    subtitle: 'Learn how your paddle aims',
+    question: 'YOUR SIDE',
+    option: 'side',
+    choices: [['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom'], ['right', 'Right']],
+    keys: (sideways) => (sideways ? 'Move with A/D or ←/→' : 'Move with W/S or ↑/↓'),
+  },
   versus: {
     title: 'Two players',
     subtitle: 'Two people on one keyboard, first to 11',
@@ -153,14 +161,21 @@ export class Setup extends Scene {
     const solo = this.mode === 'solo';
     if (solo) {
       box(field.width - inset - 8, inset, 8, field.height - inset * 2, COLORS.muted);
-    } else {
+    } else if (this.mode !== 'aim') {
       for (let d = inset + 20; d < field.height - inset - 20; d += 60) box(field.width / 2 - 4, d, 8, 30, COLORS.line);
     }
     // Paddles in their sides' colors
-    const sides = solo ? [view.side]
+    const aim = this.mode === 'aim';
+    const sides = solo || aim ? [view.side]
       : this.mode === 'cpu' ? [view.side, OPPOSITE[view.side]]
         : view.sideways ? ['top', 'bottom'] : ['left', 'right'];
-    sides.forEach((name, i) => box(paddles[i].x - 4, paddles[i].y, P.width + 8, P.height, SIDE_COLORS[name], 3));
+    if (aim) {
+      // The aim paddle's colors, top to bottom: blue, white, coral
+      const third = P.height / 3;
+      [COLORS.left, COLORS.ball, COLORS.right].forEach((color, i) => box(paddles[0].x - 4, paddles[0].y + i * third, P.width + 8, third, color));
+    } else {
+      sides.forEach((name, i) => box(paddles[i].x - 4, paddles[i].y, P.width + 8, P.height, SIDE_COLORS[name], 3));
+    }
 
     // Against the CPU, say which paddle is whose: left and right look alike otherwise
     this.previewLabels.forEach((label) => label.destroy());
