@@ -4,7 +4,16 @@ A 2D Pong game in the browser. Start small, add features later.
 
 Built with Phaser 4 and Vite, and published on GitHub Pages. Online play runs on a small Node server.
 
-## v0.9 — Online Multiplayer (now)
+## v0.10 — Pick Your Side (now)
+
+- Every mode has a setup screen before it starts. Your choice is remembered.
+- Play on any side: left, right, top or bottom. On the top or bottom the paddle lies flat and moves with `A`/`D` or `←`/`→`.
+- Each side has its own paddle color: blue left, coral right, mint top, violet bottom
+- Solo, CPU and aim practice: pick your side. Two players: left and right, or top and bottom.
+- Online, each player picks their own side and the other moves across. The other player's side is faded out.
+- Sides are shown in facing pairs: (Left Right) (Top Bottom)
+
+## v0.9 — Online Multiplayer (done)
 
 - **Online** on the start screen opens the lobby: a table of rooms with friendly names (like "Swift Comet"), who's in each one and whether it's open, full or playing, plus how many players are online. Join an open room, or create your own.
 - In a room, both players press **Ready**. After a 3-second countdown, the match starts: normal two-player rules, first to 11.
@@ -86,6 +95,7 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-11-04** — v0.10 built: pick your side, in every mode.
 - **2026-11-04** — Setup screens group the sides in facing pairs too, like online rooms.
 - **2026-11-04** — Online sides are grouped in facing pairs: (Left Right) (Top Bottom).
 - **2026-11-04** — Online, the side the other player is on is faded out and can't be picked.
