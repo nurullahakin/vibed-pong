@@ -85,3 +85,13 @@ test('view: aim practice can be on any side too', () => {
 test('view: top and bottom lay paddles flat, left and right keep them upright', () => {
   assert.deepEqual(SIDES.map((side) => makeView(side).sideways), [false, false, true, true]);
 });
+
+test('view: toField undoes point, for every side', () => {
+  for (const side of SIDES) {
+    const view = makeView(side);
+    for (const [x, y] of [[0, 0], [123, 45], [599, 777]]) {
+      const back = view.point(x, y);
+      assert.deepEqual(view.toField(back.x, back.y), { x, y }, side);
+    }
+  }
+});

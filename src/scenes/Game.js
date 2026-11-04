@@ -18,11 +18,15 @@ export class Game extends Scene {
 
   init(data) {
     this.mode = data.mode;
-    this.options = data.options ?? {}; // e.g. { side: 'top' } for solo, { sides: 'topBottom' } for two players, { firstSide: 'right' } online
+    this.options = data.options ?? {}; // e.g. { side: 'top', control: 'mouse' } for solo, { sides: 'topBottom' } for two players, { firstSide: 'right' } online
+    this.control = this.options.control ?? 'keys'; // keys, mouse or both
     this.online = data.mode === 'online';
     this.seat = data.seat ?? 0; // online: 0 plays left, 1 plays right
     // Phaser reuses the scene object when a game restarts, so reset per-game flags
     this.ending = false;
+    // With the mouse, the paddle waits until you point somewhere. With both,
+    // whichever you used last is in charge.
+    this.usingMouse = false;
   }
 
   create() {
@@ -92,7 +96,7 @@ export class Game extends Scene {
       const keys = sideways ? 'A/D or ←/→' : 'W/S or ↑/↓';
       const labels = {
         versus: sideways ? ['A/D', '←/→'] : ['W/S', '↑/↓'],
-        cpu: [keys, 'CPU'],
+        cpu: [{ keys, mouse: 'Mouse', both: `${keys} or mouse` }[this.control], 'CPU'],
         online: this.seat === 0 ? [`You: ${keys}`, 'Them'] : ['Them', `You: ${keys}`],
       }[mode];
       this.serveHints = labels.map((label, i) => (sideways
@@ -101,6 +105,7 @@ export class Game extends Scene {
     }
 
     this.keys = this.input.keyboard.addKeys('W,S,UP,DOWN,A,D,LEFT,RIGHT');
+    if (this.control !== 'keys') this.input.on('pointermove', () => { this.usingMouse = true; });
     // P and Esc both pause. Online, the match can't stop, so the pause screen
     // just sits on top while play goes on.
     const pause = () => {
@@ -154,6 +159,14 @@ export class Game extends Scene {
     const held = (names) => names.some((k) => this.keys[k].isDown);
     const controls = !this.view.sideways ? CONTROLS[this.mode] : this.mode === 'versus' ? CONTROLS.versusSideways : CONTROLS.oneSideways;
     const dirs = controls.map(({ up, down }) => (held(down) ? 1 : 0) - (held(up) ? 1 : 0));
+    // With both, pressing a key takes over from the mouse until it moves again
+    if (this.control === 'both' && dirs[0] !== 0) this.usingMouse = false;
+    if (this.control === 'mouse' || this.usingMouse) {
+      // Your paddle heads for the pointer as if you held the key that way
+      const pointer = this.input.activePointer;
+      const target = this.view.toField(pointer.x, pointer.y).y;
+      dirs[0] = this.usingMouse ? rules.towardPointer(this.state.paddles[0], target) : 0;
+    }
 
     if (this.online) {
       // Only tell the server when the direction changes

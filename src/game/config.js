@@ -13,6 +13,9 @@ export const CONFIG = {
     startSpeed: 120,
     maxSpeed: 520,
     accel: 1800, // reaches top speed after about a fifth of a second
+    // With the mouse, the paddle stops once its middle is this close to the pointer.
+    // More than half a frame's move at top speed, so it can't skip past and wobble.
+    mouseDeadzone: 12,
   },
   ball: { size: 10, startSpeed: 350, speedUp: 1.05, maxSpeed: 900 },
   maxBounceAngle: Math.PI / 3, // reached when the ball hits the paddle's very edge

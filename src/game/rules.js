@@ -143,6 +143,15 @@ export function update(state, dirs, dt) {
   return events;
 }
 
+// Mouse control, as a key direction: like holding the key toward the pointer, so
+// the paddle speeds up just as it does with keys instead of jumping there. Stops
+// when its middle is close enough. targetY: the pointer's spot along the paddle's track.
+export function towardPointer(p, targetY) {
+  const { paddle: P } = CONFIG;
+  const gap = targetY - (p.y + P.height / 2);
+  return Math.abs(gap) <= P.mouseDeadzone ? 0 : Math.sign(gap);
+}
+
 // Paddles start slow and speed up while the key is held, so a short tap is a
 // small nudge. Letting go stops the paddle at once, and reversing starts slow again.
 function movePaddle(state, p, dir, dt) {

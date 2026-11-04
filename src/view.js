@@ -45,6 +45,12 @@ export function makeView(side = 'left') {
     point(x, y) {
       return { x: xx * x + xy * y + offsetX, y: yx * x + yy * y + offsetY };
     },
+    // A point on the screen, as a point on the field (the way back from point())
+    toField(x, y) {
+      const dx = x - offsetX;
+      const dy = y - offsetY;
+      return { x: xx * dx + yx * dy, y: xy * dx + yy * dy };
+    },
     // A direction on the field in degrees (0 points along x), as one on screen.
     // Kept as a straight line rather than wrapped to ±180, so angle ranges stay ranges.
     angle(degrees) {

@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../src/game/config.js';
-import { aimPattern, createState, update } from '../src/game/rules.js';
+import { aimPattern, createState, towardPointer, update } from '../src/game/rules.js';
 
 const DT = 1 / 60;
 const { width, height, paddle: P } = CONFIG;
@@ -218,4 +218,17 @@ test('paddles stay inside the walls', () => {
   for (let i = 0; i < 120; i++) update(state, [-1, 1], DT);
   assert.equal(state.paddles[0].y, CONFIG.wall);
   assert.equal(state.paddles[1].y, height - CONFIG.wall - P.height);
+});
+
+test('mouse: the paddle speeds up toward the pointer like a held key, then stops there', () => {
+  const state = createState('solo');
+  const p = state.paddles[0];
+  const target = 120; // well above the paddle
+  const middle = () => p.y + CONFIG.paddle.height / 2;
+  update(state, [towardPointer(p, target)], 1 / 60);
+  assert.equal(p.speed, CONFIG.paddle.startSpeed, 'starts slow, not at the pointer');
+  for (let i = 0; i < 120; i++) update(state, [towardPointer(p, target)], 1 / 60);
+  assert.ok(Math.abs(middle() - target) <= CONFIG.paddle.mouseDeadzone, 'arrives');
+  assert.equal(towardPointer(p, target), 0, 'and stays still');
+  assert.equal(towardPointer(p, middle() + 100), 1, 'heads back down when the pointer does');
 });

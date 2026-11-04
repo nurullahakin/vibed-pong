@@ -95,6 +95,8 @@ Like juggling a football: keep the ball going as long as you can.
 
 ## Progress
 
+- **2026-11-04** — A third control option, Both: keys and mouse together, and whichever you used last is in charge.
+- **2026-11-04** — Solo, CPU and aim practice can be played with the mouse, picked on the setup screen. The paddle heads for the pointer like a held key.
 - **2026-11-04** — v0.10 built: pick your side, in every mode.
 - **2026-11-04** — Setup screens group the sides in facing pairs too, like online rooms.
 - **2026-11-04** — Online sides are grouped in facing pairs: (Left Right) (Top Bottom).
@@ -153,3 +155,4 @@ Like juggling a football: keep the ball going as long as you can.
 - Aim practice balls all arrive at the paddle's middle line, so the only thing that changes the shot is where you put your paddle. That's the lesson.
 - The CPU has one difficulty, tuned by simulation so an average player wins about 60–75% of games. Difficulty levels can come later if one level isn't enough. It was retuned when paddle acceleration made players slower to react.
 - Player paddles speed up from 120 to 520 px/s in about a fifth of a second, and stop the moment the key is released, so there's no sliding past the target. The CPU's paddle keeps a steady speed.
+- The mouse works like holding a key toward the pointer, not like dragging the paddle there, so it keeps the same speed-up and top speed as keys and isn't an easier way to play. With Both, the last one used wins, so letting go of a key doesn't send the paddle back to the pointer. Two players and online stay on keys for now.
